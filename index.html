@@ -1,0 +1,2114 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Software, Hardware & Network Solution - WA 0813-5152-2800</title>
+    
+    <!-- CSS Bootstrap, jQuery UI & FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Dependency Libraries JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
+    <style>
+        body { background-color: #f0f2f5; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 0.9rem; padding-bottom: 70px; }
+        .card { border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border: none; margin-bottom: 15px; }
+        .card-header { font-weight: bold; border-top-left-radius: 10px !important; border-top-right-radius: 10px !important; padding: 10px 15px; transition: background 0.3s ease; }
+        .ui-autocomplete { z-index: 1050 !important; max-height: 200px; overflow-y: auto; overflow-x: hidden; font-size: 0.85rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .ui-menu-item { padding: 8px 5px; border-bottom: 1px solid #eee; }
+        .form-control-sm { font-size: 0.85rem; }
+        .form-label { font-size: 0.8rem; font-weight: 600; color: #555; margin-bottom: 2px; }
+        .text-mono { font-family: monospace; font-weight: bold; }
+        .saved-item-card { background: #fff; border-left: 4px solid #198754; padding: 10px; border-radius: 6px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); font-size: 0.85rem; }
+        .sticky-bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); padding: 10px 15px; z-index: 1000; display: flex; justify-content: space-between; align-items: center; }
+        #errorBanner { display: none; background: #dc3545; color: white; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-weight: bold; font-size: 0.85rem; text-align: center; }
+        .marquee-container { overflow: hidden; white-space: nowrap; width: 100%; display: inline-block; }
+        .marquee-text { display: inline-block; padding-left: 100%; animation: marqueeScroll 12s linear infinite; }
+        @keyframes marqueeScroll { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
+        @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @media print { 
+            html, body { background: white !important; margin: 0; padding: 0; } 
+            .page-break { page-break-after: always; break-after: page; } 
+            tr, td, th, div { break-inside: avoid; page-break-inside: avoid; }
+            @page { size: 16.5cm 21.5cm; margin: 5mm 5mm 5mm 5mm; } 
+        }
+    </style>
+</head>
+<body>
+
+<!-- CUSTOM DIALOG OVERLAY (REPLACES NATIVE ALERT, CONFIRM, PROMPT) -->
+<div id="customDialogModal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10500; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(3px);">
+    <div style="background: white; border-radius: 16px; width: 100%; max-width: 320px; padding: 25px 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); animation: popIn 0.3s ease-out;">
+        <div id="customDialogMsg" style="font-size: 0.95rem; color: #1e293b; margin-bottom: 20px; font-weight: 600; word-wrap: break-word; line-height: 1.4;"></div>
+        <input type="text" id="customDialogInput" class="form-control text-center mb-3 border-primary shadow-sm" style="display:none; font-weight: bold;" autocomplete="off">
+        <div id="customDialogButtons" class="d-flex gap-2 justify-content-center">
+            <button id="btnDialogCancel" class="btn btn-light fw-bold flex-fill py-2" style="border-radius: 8px; border: 1px solid #cbd5e1; display:none; color: #475569;">Batal</button>
+            <button id="btnDialogOk" class="btn btn-primary fw-bold flex-fill py-2" style="border-radius: 8px;">Oke</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.artAlert = function(msg) {
+        return new Promise(resolve => {
+            document.getElementById('customDialogMsg').innerHTML = String(msg).replace(/\n/g, '<br>');
+            document.getElementById('customDialogInput').style.display = 'none';
+            document.getElementById('btnDialogCancel').style.display = 'none';
+            let btnOk = document.getElementById('btnDialogOk');
+            btnOk.className = "btn btn-primary fw-bold flex-fill py-2";
+            document.getElementById('customDialogModal').style.display = 'flex';
+            btnOk.onclick = function() {
+                document.getElementById('customDialogModal').style.display = 'none';
+                resolve();
+            };
+        });
+    };
+    window.artConfirm = function(msg) {
+        return new Promise(resolve => {
+            document.getElementById('customDialogMsg').innerHTML = String(msg).replace(/\n/g, '<br>');
+            document.getElementById('customDialogInput').style.display = 'none';
+            document.getElementById('btnDialogCancel').style.display = 'block';
+            let btnOk = document.getElementById('btnDialogOk');
+            btnOk.className = "btn btn-primary fw-bold flex-fill py-2";
+            document.getElementById('customDialogModal').style.display = 'flex';
+            btnOk.onclick = function() {
+                document.getElementById('customDialogModal').style.display = 'none';
+                resolve(true);
+            };
+            document.getElementById('btnDialogCancel').onclick = function() {
+                document.getElementById('customDialogModal').style.display = 'none';
+                resolve(false);
+            };
+        });
+    };
+    window.artPrompt = function(msg, defaultVal = '') {
+        return new Promise(resolve => {
+            document.getElementById('customDialogMsg').innerHTML = String(msg).replace(/\n/g, '<br>');
+            let inp = document.getElementById('customDialogInput');
+            inp.style.display = 'block';
+            inp.type = msg.toLowerCase().includes('password') ? 'password' : 'text';
+            inp.value = defaultVal;
+            document.getElementById('btnDialogCancel').style.display = 'block';
+            let btnOk = document.getElementById('btnDialogOk');
+            btnOk.className = "btn btn-primary fw-bold flex-fill py-2";
+            document.getElementById('customDialogModal').style.display = 'flex';
+            setTimeout(() => { inp.focus(); inp.select(); }, 100);
+            btnOk.onclick = function() {
+                document.getElementById('customDialogModal').style.display = 'none';
+                resolve(inp.value);
+            };
+            document.getElementById('btnDialogCancel').onclick = function() {
+                document.getElementById('customDialogModal').style.display = 'none';
+                resolve(null);
+            };
+        });
+    };
+    window.alert = function(msg) { artAlert(msg); };
+</script>
+
+<div id="salesManagerModal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;">
+    <div style="background: white; padding: 20px; border-radius: 10px; width: 95%; max-width: 400px; max-height: 90vh; overflow-y: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+        
+        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.85rem;">🏢 Profil Perusahaan</h6>
+        <div class="mb-3 border-bottom pb-3">
+            <label class="form-label text-primary" style="font-size: 0.75rem;">Logo Perusahaan</label>
+            <input type="file" class="form-control form-control-sm mb-2" accept="image/*" onchange="changeCompanyLogo(this)">
+            <input type="text" id="adminCompName" class="form-control form-control-sm mb-2" placeholder="Nama Perusahaan">
+            <input type="text" id="adminCompAddr" class="form-control form-control-sm mb-2" placeholder="Alamat Perusahaan">
+            <button class="btn btn-sm btn-primary w-100 fw-bold" onclick="saveCompanyProfile()">Simpan Profil</button>
+        </div>
+
+        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.85rem;">✍️ Tanda Tangan Sales (Invoice)</h6>
+        <div class="mb-3 border-bottom pb-3">
+            <input type="file" class="form-control form-control-sm mb-2" accept="image/*" onchange="changeSignatureLogo(this)">
+            <div class="text-center">
+                <img id="adminSignaturePreview" src="" style="max-height: 40px; display: none; object-fit: contain;" class="border rounded p-1 mb-2">
+            </div>
+            <button class="btn btn-sm btn-danger w-100 fw-bold" onclick="removeSignature()" id="btnRemoveSig" style="display:none;">Hapus Tanda Tangan</button>
+        </div>
+
+        <h6 class="mb-2 fw-bold text-dark border-bottom pb-2">Manajemen Data Sales & GPS</h6>
+        <div class="mb-3">
+            <input type="text" id="newSalesCode" class="form-control form-control-sm mb-2" placeholder="Kode Sales (Misal: S01)" autocomplete="off">
+            <input type="text" id="newSalesName" class="form-control form-control-sm mb-2" placeholder="Nama Sales" autocomplete="off">
+            <div class="input-group input-group-sm mb-2">
+                <input type="text" id="newSalesPhone" class="form-control" placeholder="Nomor HP / WA" autocomplete="off">
+                <button class="btn btn-outline-primary fw-bold px-2" type="button" onclick="pickContact()" title="Pilih dari Buku Kontak WA">📇 Kontak</button>
+            </div>
+            <div class="mb-2">
+                <label class="form-label text-danger mb-1" style="font-size: 0.75rem;">Masa Aktif / Tanggal Terakhir Dipakai:</label>
+                <input type="date" id="newSalesExpiry" class="form-control form-control-sm">
+            </div>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" id="newSalesPrint">
+                <label class="form-check-label text-dark fw-bold" style="font-size:0.8rem;" for="newSalesPrint">Ijinkan Cetak/Share Invoice</label>
+            </div>
+            <button class="btn btn-sm btn-success w-100 fw-bold" onclick="addSales()">+ Tambah Sales</button>
+        </div>
+        <h6 class="fw-bold text-secondary" style="font-size: 0.8rem;">Daftar Sales Terdaftar</h6>
+        <ul id="salesListContainer" class="list-group mb-3" style="font-size: 0.85rem;"></ul>
+        
+        <hr class="my-3">
+        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.85rem;">📞 Nomor WhatsApp Admin (Penerima Laporan)</h6>
+        <div class="mb-3 d-flex gap-2">
+            <input type="text" id="adminWaNumber" class="form-control form-control-sm" placeholder="Contoh: 081234..." autocomplete="off">
+            <button class="btn btn-sm btn-primary fw-bold px-3" onclick="saveAdminWA()">Simpan</button>
+        </div>
+        <hr class="my-3">
+        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.85rem;">📄 Note Invoice (2 Baris)</h6>
+        <div class="mb-3">
+            <textarea id="invoiceNoteInput" class="form-control form-control-sm mb-1" rows="2" placeholder="Baris 1&#10;Baris 2"></textarea>
+            <button class="btn btn-sm btn-primary w-100 fw-bold" onclick="saveInvoiceNote()">Simpan Note</button>
+        </div>
+        <hr class="my-3">
+        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.85rem;">Pesan Motivasi Audio (Suara)</h6>
+        <div class="mb-3">
+            <textarea id="motivationMsgInput" class="form-control form-control-sm mb-1" rows="2" placeholder="Contoh: {waktu} {nama}, capai target hari ini!"></textarea>
+            <div class="form-text text-muted mb-2" style="font-size: 0.7rem; line-height: 1.1;">Gunakan <b>{nama}</b> untuk memanggil nama otomatis.</div>
+            <button class="btn btn-sm btn-primary w-100 fw-bold" onclick="saveMotivationMsg()">Simpan Pesan Suara</button>
+        </div>
+        
+        <hr class="my-3">
+        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.85rem;">🔒 Ubah Password Admin</h6>
+        <div class="mb-3 d-flex gap-2">
+            <input type="text" id="newAdminPwd" class="form-control form-control-sm" placeholder="Password Baru" autocomplete="off">
+            <button class="btn btn-sm btn-warning fw-bold px-3" onclick="changeAdminPassword()">Update</button>
+        </div>
+        <hr class="my-3">
+        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.85rem;">🎨 Pilih Tema Warna Background</h6>
+        <div class="mb-2 d-flex justify-content-between gap-1">
+            <button class="btn btn-sm flex-fill fw-bold text-white" style="background: #f0f2f5; color:#333 !important;" onclick="setThemeColor('#f0f2f5', '#212529')">Default</button>
+            <button class="btn btn-sm flex-fill fw-bold text-white" style="background: #198754;" onclick="setThemeColor('#e8f5e9', '#198754')">Hijau</button>
+            <button class="btn btn-sm flex-fill fw-bold text-white" style="background: #0d6efd;" onclick="setThemeColor('#e7f1ff', '#0d6efd')">Biru</button>
+            <button class="btn btn-sm flex-fill fw-bold text-white" style="background: #6610f2;" onclick="setThemeColor('#f3e8ff', '#6610f2')">Ungu</button>
+            <button class="btn btn-sm flex-fill fw-bold text-white" style="background: #212529;" onclick="setThemeColor('#2b3035', '#f8f9fa')">Dark</button>
+        </div>
+        <div class="mb-3 d-flex gap-2 align-items-center bg-light p-2 rounded border">
+            <label class="form-label m-0 text-secondary" style="font-size: 0.75rem;">Custom Warna:</label>
+            <input type="color" id="customColorPicker" class="form-control form-control-color form-control-sm" value="#0d6efd" style="width: 40px; height: 30px; padding: 2px;" title="Pilih Warna Bebas">
+            <input type="text" id="customColorText" class="form-control form-control-sm text-mono text-center" placeholder="#HEX" value="#0d6efd" style="font-size: 0.8rem;">
+            <button class="btn btn-sm btn-primary fw-bold px-3" onclick="applyCustomThemeColor()">Terapkan</button>
+        </div>
+        <hr class="my-3">
+        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.85rem;">👋 Pesan Suara Saat Logout</h6>
+        <div class="mb-3">
+            <textarea id="logoutMsgInput" class="form-control form-control-sm mb-1" rows="2" placeholder="Contoh: Terimakasih {nama}, sukses dan sehat selalu"></textarea>
+            <div class="form-text text-muted mb-2" style="font-size: 0.7rem; line-height: 1.1;">Gunakan <b>{nama}</b> untuk memanggil nama otomatis.</div>
+            <button class="btn btn-sm btn-primary w-100 fw-bold" onclick="saveLogoutMsg()">Simpan Pesan Logout</button>
+        </div>
+        <button class="btn btn-danger w-100 fw-bold py-2" onclick="closeSalesManager()">Tutup Admin</button>
+    </div>
+</div>
+
+<!-- ================= MENU LOGIN FULL SCREEN ================= -->
+<div id="loginScreen" class="container-fluid d-flex flex-column justify-content-center align-items-center" style="min-height: 100vh; width: 100vw; position: fixed; top: 0; left: 0; background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%); z-index: 2000; display: none; padding: 20px;">
+    <div class="card shadow-lg border-0 p-3 text-center" style="width: 100%; max-width: 420px; border-radius: 16px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);">
+        <div class="card-body p-3">
+            <div class="mb-3 d-flex justify-content-center align-items-center gap-3">
+                <img src="https://via.placeholder.com/200x60?text=LOGO+PERUSAHAAN" id="loginCompanyLogo" class="img-fluid" style="max-height: 50px; object-fit: contain;" title="Logo Perusahaan">
+                <div>
+                    <h5 id="loginCompanyName" class="fw-bold text-dark m-0 text-center" style="font-size: 1.1rem;">NAMA PERUSAHAAN, PT</h5>
+                    <div id="loginCompanyAddress" class="text-muted text-center mt-1" style="font-size: 0.8rem; font-weight: 500;">ALAMAT PERUSAHAAN</div>
+                </div>
+            </div>
+            
+            <!-- Area Tulisan artSOFT & Marquee (Menjadi Trigger Menu Admin) -->
+            <div class="mb-3 px-3 py-2 position-relative overflow-hidden" onclick="openSalesManager()" style="cursor: pointer;" title="Buka Pengaturan Admin">
+                <div class="d-flex align-items-center" style="min-height: 31px;">
+                    <span class="fw-bold text-primary me-3 flex-shrink-0" style="font-size: 1.05rem; letter-spacing: 0.5px;">artSOFT</span>
+                    <div class="marquee-container">
+                        <span class="marquee-text" style="font-size: 0.8rem; font-weight: normal; font-style: italic; color: #6610f2;">
+                            Software, Hardware &amp; Network Solution &nbsp;|&nbsp; <i class="fab fa-whatsapp text-success" style="font-size: 1rem;"></i> 0813-5152-2800 &nbsp;|&nbsp; <i class="fas fa-envelope text-danger" style="font-size: 1rem;"></i> cs.artsoft@gmail.com
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-2">
+            
+            <div class="mb-3 position-relative shadow-sm" style="border-radius: 10px;">
+                <i class="fas fa-user-tie position-absolute top-50 start-0 translate-middle-y ms-3 text-primary" style="font-size: 1.2rem; z-index: 5;"></i>
+                <input type="text" id="loginSalesIdInput" class="form-control form-control-lg text-center text-mono fs-4 border-primary" placeholder="Ketik Kode Sales..." autocomplete="off" required style="letter-spacing: 2px; border-radius: 10px; padding-left: 2.5rem; padding-right: 2.5rem;">
+            </div>
+            
+            <button class="btn btn-primary btn-lg w-100 fw-bold py-3 shadow-sm mb-2" style="border-radius: 10px; font-size: 1.05rem;" onclick="processLogin()">LOGIN SEKARANG</button>
+            <div class="text-muted" style="font-size: 0.75rem;">artSOFT Mobile Order System &bull; v50</div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= MAIN APP =================== -->
+<div id="mainApp" class="container-fluid pt-3" style="display: none;">
+    <div class="mb-3 p-3 bg-white rounded shadow-sm border d-flex justify-content-center align-items-center gap-3" style="overflow: hidden;">
+        <img src="https://via.placeholder.com/200x60?text=LOGO+PERUSAHAAN" id="companyLogo" class="img-fluid" style="max-height: 50px; object-fit: contain;" title="Logo Perusahaan">
+        <div>
+            <h5 id="companyName" class="fw-bold text-dark m-0 text-center">NAMA PERUSAHAAN, PT</h5>
+            <div id="companyAddress" class="text-muted text-center mt-1" style="font-size: 0.75rem; font-weight: 500;">ALAMAT PERUSAHAAN</div>
+        </div>
+    </div>
+
+    <!-- Area Tulisan Berjalan Tanpa Kotak + Trigger Menu Action -->
+    <div class="mb-3 px-3 py-2 position-relative overflow-hidden" onclick="toggleActionButtons()" style="cursor: pointer;" title="Ketuk untuk Menampilkan/Menyembunyikan Menu Update Master & Saldo Stok">
+        <div class="d-flex align-items-center" style="min-height: 31px;">
+            <span class="fw-bold text-primary me-3 flex-shrink-0" style="font-size: 1.05rem; letter-spacing: 0.5px;">artSOFT</span>
+            <div class="marquee-container">
+                <span class="marquee-text" style="font-size: 0.8rem; font-weight: normal; font-style: italic; color: #6610f2;">
+                    Software, Hardware &amp; Network Solution &nbsp;|&nbsp; <i class="fab fa-whatsapp text-success" style="font-size: 1rem;"></i> 0813-5152-2800 &nbsp;|&nbsp; <i class="fas fa-envelope text-danger" style="font-size: 1rem;"></i> cs.artsoft@gmail.com
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div id="errorBanner">⚠️ Pastikan internet aktif saat pertama kali dibuka!</div>
+
+    <!-- Container Action Buttons (Disembunyikan Default) -->
+    <div id="actionButtonsContainer" style="display: none;">
+        <div class="row g-2 mb-2">
+            <div class="col-6">
+                <button type="button" id="btnOpenMasterMenu" class="btn btn-outline-dark btn-sm w-100 fw-bold py-2 shadow-sm" onclick="toggleMasterUploadPanel()">
+                    🔄 Update Master
+                </button>
+            </div>
+            <div class="col-6">
+                <button type="button" class="btn btn-outline-primary btn-sm w-100 fw-bold py-2 shadow-sm" onclick="openStockReportModal()">
+                    📦 SALDO STOCK
+                </button>
+            </div>
+        </div>
+
+        <div id="masterUploadPanel" class="card mt-2 mb-3 p-3 bg-white border" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="fw-bold text-primary m-0" style="font-size: 0.85rem;">Panel Update Master Data</h6>
+                <button type="button" class="btn btn-sm btn-secondary py-0 px-2" style="font-size: 0.7rem;" onclick="toggleMasterUploadPanel()">Tutup</button>
+            </div>
+            <div class="row g-2 mb-2">
+                <div class="col-6">
+                    <div class="p-2 border rounded bg-light h-100 text-center">
+                        <label class="form-label text-primary d-block">1. CUSTOMER.xlsx</label>
+                        <div id="statusCustomer" class="text-danger fw-bold mb-1" style="font-size: 0.7rem;">Belum diunggah</div>
+                        <input type="file" id="uploadCustomer" class="form-control form-control-sm" accept=".xlsx, .xls">
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="p-2 border rounded bg-light h-100 text-center">
+                        <label class="form-label text-success d-block">2. PRODUK.xlsx</label>
+                        <div id="statusProduk" class="text-danger fw-bold mb-1" style="font-size: 0.7rem;">Belum diunggah</div>
+                        <input type="file" id="uploadProduk" class="form-control form-control-sm" accept=".xlsx, .xls">
+                    </div>
+                </div>
+            </div>
+            <div class="p-2 border rounded bg-dark text-white text-center">
+                <label class="form-label text-warning d-block mb-1" style="font-size: 0.75rem;">☁️ Update Master Sekali Klik (Dari Grup / Server)</label>
+                <input type="text" id="masterServerUrl" class="form-control form-control-sm mb-2 text-mono" placeholder="Masukkan URL / Link File Excel Kantor..." autocomplete="off">
+                <div class="d-flex gap-1">
+                    <button type="button" class="btn btn-warning btn-sm w-50 fw-bold py-1" style="font-size: 0.75rem;" onclick="saveDefaultServerUrl()">Simpan Link</button>
+                    <button type="button" class="btn btn-success btn-sm w-50 fw-bold py-1" style="font-size: 0.75rem;" onclick="syncMasterFromUrl()">⚡ Update Sekarang</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FORM INPUT ORDER -->
+    <div class="card border-0 shadow-sm mb-4">
+        <!-- HEADER ELEGAN, MODERN, DAN PROFESIONAL -->
+        <div id="formHeader" class="card-header text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #0f172a 0%, #1e3c72 50%, #2a5298 100%); border-radius: 10px 10px 0 0; padding: 12px 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
+            <span id="formTitle" class="fw-bold" style="font-size: 1.05rem; letter-spacing: 0.5px;">INPUT ORDER <i class="fas fa-shopping-cart ms-1 text-warning"></i></span>
+            <button class="btn btn-sm btn-light fw-bold py-0" style="border-radius:6px; color: #0f172a;" onclick="resetFormOnly()">Reset</button>
+        </div>
+        <div class="card-body p-3">
+            <form id="soForm">
+                <div class="row g-2 mb-2">
+                    <div class="col-5">
+                        <label class="form-label">Sales ID</label>
+                        <input type="text" id="salesId" class="form-control form-control-sm text-mono bg-light text-primary fw-bold" readonly required>
+                    </div>
+                    <div class="col-7">
+                        <label class="form-label d-flex justify-content-between mb-0" style="font-size: 0.8rem;">
+                            <span>No. Order</span>
+                            <span id="dateDisplay" class="text-secondary fw-bold" style="font-size: 0.75rem;"></span>
+                        </label>
+                        <div class="input-group input-group-sm mt-1">
+                            <input type="text" id="orderNo" class="form-control bg-light text-mono text-primary" required>
+                            <div class="input-group-text p-0 position-relative" style="width: 38px; cursor: pointer; overflow:hidden; background-color: #e9ecef; border-left: none;">
+                                <!-- Ikon Kalender Dinamis (Menampilkan Angka Tanggal Hari Ini) -->
+                                <span class="w-100 h-100 d-flex justify-content-center align-items-center position-absolute top-0 start-0" style="pointer-events: none;">
+                                    <div style="width: 22px; height: 24px; border: 2px solid #64748b; border-radius: 4px; display: flex; flex-direction: column; overflow: hidden; background: white;">
+                                        <div style="background: #ef4444; height: 6px; width: 100%;"></div>
+                                        <div id="dynamicCalDay" style="color: #0f172a; font-weight: 900; font-size: 12px; text-align: center; line-height: 14px;"></div>
+                                    </div>
+                                </span>
+                                <input type="date" id="orderDatePicker" class="form-control" style="opacity: 0; width: 100%; height: 100%; cursor: pointer; position: absolute; top:0; left:0;" required title="Ubah Tanggal Transaksi" onchange="if(this.value){ let p = this.value.split('-'); document.getElementById('dateDisplay').innerText = p[2] + '-' + p[1] + '-' + p[0]; document.getElementById('dynamicCalDay').innerText = p[2]; }">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3 border-bottom pb-3 mt-3">
+                    <label class="form-label">Cari Toko / Customer</label>
+                    <div class="input-group input-group-sm mb-1">
+                        <input type="text" id="custSearch" class="form-control form-control-sm border-primary border-end-0" placeholder="Ketik nama / kode toko..." required autocomplete="off">
+                        <button class="btn btn-outline-primary border-start-0 px-3" type="button" onclick="triggerScanTokoGps()" title="Scan Lokasi GPS">📍</button>
+                    </div>
+                    <input type="hidden" id="custId">
+                    <div class="form-text text-primary fw-bold mt-1" id="custDetail" style="font-size: 0.75rem;"></div>
+                </div>
+
+                <div class="card bg-light p-2 mb-3 border shadow-sm">
+                    <h6 class="fw-bold text-success mb-2" style="font-size: 0.85rem;">Input SKU Produk</h6>
+                    <div class="mb-2">
+                        <label class="form-label">Cari Nama Produk / Barang</label>
+                        <div class="input-group input-group-sm mb-1 position-relative">
+                            <input type="text" id="inputProdSearch" class="form-control border-primary border-end-0" style="padding-right: 10px;" placeholder="🔍 Ketik nama/kode/barcode..." autocomplete="off" ondblclick="clearProductSelection()" title="Klik ganda untuk membersihkan">
+                            <button class="btn btn-outline-primary border-start-0 px-3" type="button" onclick="startScanner()" title="Scan Barcode">📷</button>
+                        </div>
+                        <input type="hidden" id="inputProdCode">
+                        <input type="hidden" id="inputProdPrice" value="0">
+                        <div class="form-text text-danger fw-bold mt-1" id="prodStockInfo" style="font-size: 0.75rem;"></div>
+                    </div>
+                    
+                    <div class="row g-2 mb-2 justify-content-center">
+                        <div class="col-4 text-center" style="max-width: 110px;">
+                            <input type="number" id="inputQty1" class="form-control form-control-sm text-center fw-bold text-secondary mb-1 border-secondary" value="0" readonly tabindex="-1" style="background-color: #f8f9fa;">
+                            <span class="d-block text-secondary fw-bold" id="lblSatuan1" style="font-size: 0.75rem;">Krt</span>
+                        </div>
+                        <div class="col-4 text-center" style="max-width: 110px;">
+                            <input type="number" id="inputQty2" class="form-control form-control-sm text-center fw-bold text-secondary mb-1 border-secondary" value="0" readonly tabindex="-1" style="background-color: #f8f9fa;">
+                            <span class="d-block text-secondary fw-bold" id="lblSatuan2" style="font-size: 0.75rem;">Pak</span>
+                        </div>
+                        <div class="col-4 text-center" style="max-width: 110px;">
+                            <input type="number" id="inputQty3" class="form-control form-control-sm text-center fw-bold text-primary mb-1 border-primary" value="0" min="0" max="9999" oninput="if(this.value.length>4) this.value=this.value.slice(0,4); calculateCurrentSubtotal();" onfocus="reverseQtyToPcs(); this.select();" onblur="autoConvertQty()" onkeyup="if(event.key === 'Enter') { autoConvertQty(); document.getElementById('inputDiscP').focus(); }">
+                            <span class="d-block text-primary fw-bold" id="lblSatuan3" style="font-size: 0.75rem;">Pcs</span>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" id="inputConv1" value="1"><input type="hidden" id="inputConv2" value="1">
+                    <input type="hidden" id="inputUom1" value=""><input type="hidden" id="inputUom2" value=""><input type="hidden" id="inputUom3" value="">
+                    <input type="hidden" id="inputHargaSatuanMaster" value="0">
+                    
+                    <!-- PERBAIKAN TATA LETAK HARGA SATUAN & SUBTOTAL AGAR PRESISI/SIMETRIS -->
+                    <div class="row g-2 mb-3 align-items-end">
+                        <div class="col-6">
+                            <label class="form-label text-secondary mb-1" style="font-size: 0.75rem; font-weight: 700;">Harga Satuan</label>
+                            <input type="text" id="inputHarga" class="form-control form-control-sm text-end fw-bold shadow-sm" style="background-color: #f8f9fa; border-color: #e2e8f0; font-size: 0.85rem;" data-raw="0" value="0" readonly>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-primary mb-1" style="font-size: 0.75rem; font-weight: 700;">Subtotal</label>
+                            <input type="text" id="inputSubtotal" class="form-control form-control-sm text-end fw-bold text-primary shadow-sm" style="background-color: #eff6ff; border-color: #bfdbfe; font-size: 0.85rem;" value="0" readonly>
+                        </div>
+                    </div>
+
+                    <!-- BLOK BONUS & DISC (STANDAR INPUT TANPA SEKAT) -->
+                    <div class="row g-2 mb-3 align-items-end">
+                        <!-- Kolom Bonus -->
+                        <div class="col-4">
+                            <label class="form-label mb-1" style="font-size: 0.75rem; font-weight: 700; color: #555;">Bonus (<span id="lblSatuanBonus">Pcs</span>)</label>
+                            <input type="number" id="inputBonus" class="form-control form-control-sm shadow-sm text-center fw-bold" style="font-size: 0.85rem;" value="0" min="0" onfocus="this.select();">
+                        </div>
+                        <!-- Kolom Disc % -->
+                        <div class="col-3">
+                            <label class="form-label mb-1" style="font-size: 0.75rem; font-weight: 700; color: #555;">Disc %</label>
+                            <input type="text" id="inputDiscP" class="form-control form-control-sm shadow-sm text-center fw-bold" style="font-size: 0.85rem;" value="0%" onfocus="this.value=this.value.replace('%',''); this.select();" onblur="if(this.value==='') this.value='0'; if(!this.value.includes('%')) this.value+='%';" oninput="calculateCurrentSubtotal()">
+                        </div>
+                        <!-- Kolom Disc Rp -->
+                        <div class="col-5">
+                            <label class="form-label mb-1" style="font-size: 0.75rem; font-weight: 700; color: #555;">Disc Rupiah</label>
+                            <input type="text" id="inputDiscRp" class="form-control form-control-sm shadow-sm text-end fw-bold px-2" style="font-size: 0.85rem;" value="0" onfocus="this.select();" oninput="formatDiscRpInput(this)">
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-success btn-sm w-100 fw-bold mt-2 shadow-sm" onclick="addCurrentProductToOrder()">+ Simpan 1 SKU ke Nota</button>
+                </div>
+
+                <h6 class="fw-bold mb-2">Daftar Produk di Nota Ini:</h6>
+                <div id="currentOrderItemsList" class="mb-3">
+                    <div class="text-muted text-center py-2 bg-white rounded border" style="font-size: 0.8rem;">Belum ada produk ditambahkan</div>
+                </div>
+
+                <div style="height: 30px;"></div>
+                <div class="sticky-bottom-bar">
+                    <div style="line-height: 1.2;">
+                        <span class="d-block text-secondary fw-bold" style="font-size: 0.75rem;" id="bottomTotalLabel">Total Semua Nota</span>
+                        <span class="fw-bold text-danger" style="font-size: 1.1rem;" id="bottomTotalValue">Rp 0</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="submit" id="btnSave" class="btn btn-primary fw-bold px-4 py-2" style="border-radius: 8px;">Simpan Nota</button>
+                        <button type="button" class="btn btn-danger fw-bold px-3 py-2 d-flex align-items-center justify-content-center shadow" onclick="processLogout()" title="Keluar / Power Off" style="border-radius: 50%; width: 42px; height: 42px; font-size: 1.25rem; line-height: 1; background-color: #dc3545; border: none;" aria-label="Power Off">⏻</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TRANSAKSI TERSIMPAN ELEGAN -->
+    <div class="card shadow-none mt-4" style="border: 1px solid #cbd5e1; border-radius: 10px;">
+        <div class="card-header text-white d-flex justify-content-between align-items-center p-2" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 10px 10px 0 0; border-bottom: 2px solid #d4af37;">
+            <span class="fw-bold" style="font-size: 0.9rem; letter-spacing: 0.5px;"><i class="fas fa-file-invoice text-warning me-2"></i>Transaksi Tersimpan</span>
+        </div>
+        <div class="card-body p-2">
+            <div class="row g-2 mb-2" id="printShareButtonsRow" style="display: flex;">
+                <div class="col-6"><button class="btn btn-info btn-sm w-100 fw-bold shadow-sm text-dark" onclick="processSelectedInvoices('print')" style="font-size: 0.8rem;">🖨️ Cetak Printer</button></div>
+                <div class="col-6"><button class="btn btn-success btn-sm w-100 fw-bold shadow-sm" onclick="processSelectedInvoices('share')" style="font-size: 0.8rem;">📤 Share / PDF</button></div>
+            </div>
+            <div class="row g-1 mb-2 align-items-center">
+                <div class="col-4"><button class="btn btn-outline-success btn-sm w-100 fw-bold px-1" onclick="exportToTXT()" style="font-size: 0.75rem;" title="Kirim Order">Kirim Order</button></div>
+                <div class="col-2 text-center" style="position: relative;">
+                    <!-- Ikon Filter Kalender Dinamis (Tanpa Kotak Tombol) -->
+                    <label for="filterCheckDate" class="w-100 p-0 d-flex justify-content-center align-items-center" style="height: 31px; cursor: pointer; border: none; background: transparent;" title="Filter Tanggal">
+                        <div style="width: 26px; height: 28px; border: 2.5px solid #64748b; border-radius: 5px; display: flex; flex-direction: column; overflow: hidden; background: white;">
+                            <div style="background: #ef4444; height: 7px; width: 100%;"></div>
+                            <div id="dynamicFilterCalDay" style="color: #0f172a; font-weight: 900; font-size: 13px; text-align: center; line-height: 17px;"></div>
+                        </div>
+                    </label>
+                    <input type="date" id="filterCheckDate" class="form-control form-control-sm" onchange="autoCheckByDate(); if(this.value){ document.getElementById('dynamicFilterCalDay').innerText = this.value.split('-')[2]; }" style="position: absolute; top: 0; left: 0; opacity: 0; width: 100%; height: 100%; z-index: -1;">
+                </div>
+                <div class="col-4"><button class="btn btn-outline-primary btn-sm w-100 fw-bold px-1" onclick="kirimLaporanPDF()" style="font-size: 0.75rem;" title="Kirim Laporan via PDF">Laporan</button></div>
+                <div class="col-2"><button class="btn btn-danger btn-sm w-100 fw-bold px-0" onclick="clearTransactions()" style="font-size: 0.75rem; padding-top: 0.25rem; padding-bottom: 0.25rem;" title="Hapus Semua Data Tersimpan">Reset</button></div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered align-middle" id="summaryTable" style="font-size: 0.75rem; white-space: nowrap;">
+                    <thead class="table-dark text-center">
+                        <tr>
+                            <th style="text-align: center;"><input type="checkbox" class="form-check-input border-secondary" id="checkAllExport" onclick="toggleAllExport(this)" style="cursor: pointer; width: 1.2em; height: 1.2em;"></th>
+                            <th style="text-align: center;">No. Order</th>
+                            <th style="text-align: center;">Toko</th>
+                            <th style="text-align: center;">Item</th>
+                            <th style="text-align: center;">Total Rp</th>
+                            <th style="text-align: center;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="file" id="tokoCameraInput" accept="image/*" capture="environment" style="display:none;" onchange="handleTokoCameraCaptured(this)">
+<input type="file" id="scannerFileInput" accept="image/*" capture="environment" style="display:none;" onchange="handleScannerFileSelected(this)">
+
+<script>
+    let masterProduk = [];
+    let masterCustomer = [];
+    let transactionData = [];
+    let currentSessionItems = []; 
+    let isEditingMode = false;
+    const myTabId = Math.random().toString(36).substring(2, 10);
+    
+    // FORMAT RUPIAH PADA INPUT DISC RUPIAH
+    function formatDiscRpInput(elem) {
+        let val = elem.value.replace(/[^0-9]/g, '');
+        if(val !== '') {
+            elem.value = parseInt(val).toLocaleString('id-ID');
+        } else {
+            elem.value = '0';
+        }
+        calculateCurrentSubtotal();
+    }
+
+    function toggleActionButtons() {
+        let row = document.getElementById('actionButtonsContainer');
+        row.style.display = (row.style.display === 'none' || row.style.display === '') ? 'block' : 'none';
+    }
+
+    function reverseQtyToPcs() {
+        let q1 = parseInt(document.getElementById('inputQty1').value) || 0;
+        let q2 = parseInt(document.getElementById('inputQty2').value) || 0;
+        let q3 = parseInt(document.getElementById('inputQty3').value) || 0;
+        if (q1 === 0 && q2 === 0) return; 
+        
+        let c1 = parseFloat(document.getElementById('inputConv1').value) || 1;
+        let c2 = parseFloat(document.getElementById('inputConv2').value) || 1;
+        
+        let totalPcs = (q1 * (c1 > 1 ? c1 : 1)) + (q2 * (c2 > 1 ? c2 : 1)) + q3;
+        
+        document.getElementById('inputQty1').value = 0;
+        document.getElementById('inputQty2').value = 0;
+        document.getElementById('inputQty3').value = totalPcs;
+    }
+
+    function autoConvertQty() {
+        let q3Input = document.getElementById('inputQty3');
+        if(!q3Input) return;
+        let totalPcs = parseInt(q3Input.value) || 0;
+        let c1 = parseFloat(document.getElementById('inputConv1').value) || 1;
+        let c2 = parseFloat(document.getElementById('inputConv2').value) || 1;
+        
+        let uom1 = (document.getElementById('inputUom1').value || '').trim().toLowerCase();
+        let uom2 = (document.getElementById('inputUom2').value || '').trim().toLowerCase();
+        let uom3 = (document.getElementById('inputUom3').value || '').trim().toLowerCase();
+
+        let q1 = 0, q2 = 0, q3 = 0;
+        let remainder = totalPcs;
+
+        // Jika satuan ke-2 sama dengan satuan ke-3, atau satuan ke-2 sama dengan satuan ke-1
+        if (uom2 === uom3 && uom2 !== '') {
+            let conv1 = c1 > 1 ? c1 : 1;
+            q1 = Math.floor(remainder / conv1);
+            remainder = remainder % conv1;
+            q2 = remainder;
+            q3 = 0;
+        } else if (uom1 === uom2 && uom1 !== '') {
+            let conv1 = c1 > 1 ? c1 : 1;
+            q1 = Math.floor(remainder / conv1);
+            remainder = remainder % conv1;
+            q2 = 0;
+            q3 = remainder;
+        } else if (uom1 === uom2 && uom2 === uom3 && uom1 !== '') {
+            q1 = remainder;
+            q2 = 0;
+            q3 = 0;
+        } else {
+            let units = [
+                { id: 1, conv: c1 > 1 ? c1 : 1 },
+                { id: 2, conv: c2 > 1 ? c2 : 1 }
+            ].sort((a, b) => b.conv - a.conv);
+            
+            units.forEach(u => {
+                if (remainder >= u.conv) {
+                    let qty = Math.floor(remainder / u.conv);
+                    remainder = remainder % u.conv;
+                    if (u.id === 1) q1 = qty;
+                    if (u.id === 2) q2 = qty;
+                }
+            });
+            q3 = remainder;
+        }
+        
+        document.getElementById('inputQty1').value = q1;
+        document.getElementById('inputQty2').value = q2;
+        document.getElementById('inputQty3').value = q3;
+        
+        calculateCurrentSubtotal();
+    }
+
+    function initSingleInstanceCheck() {
+        let lastTab = localStorage.getItem('artsoft_active_tab');
+        let lastTime = parseInt(localStorage.getItem('artsoft_active_time')) || 0;
+        let now = Date.now();
+        let currentSid = localStorage.getItem('savedSalesId');
+        if (currentSid) {
+            if (now - lastTime < 5000 && lastTab && lastTab !== myTabId) {
+                document.body.innerHTML = `<div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; background:#212529; color:white; font-family:sans-serif; text-align:center; padding: 20px;"><h3 class="text-warning mb-3">Sesi Aktif Terdeteksi</h3><p>Aplikasi sedang aktif di tab/perangkat lain.</p></div>`;
+                return false;
+            } else {
+                localStorage.setItem('artsoft_active_tab', myTabId);
+                localStorage.setItem('artsoft_active_time', Date.now().toString());
+            }
+        }
+        setInterval(() => {
+            let checkSid = localStorage.getItem('savedSalesId');
+            if (checkSid) {
+                let currentTab = localStorage.getItem('artsoft_active_tab');
+                if (currentTab && currentTab !== myTabId) {
+                    document.body.innerHTML = `<div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; background:#212529; color:white; font-family:sans-serif; text-align:center; padding: 20px;"><h3 class="text-danger mb-3">🔄 Sesi Berpindah</h3><p>Sistem mendeteksi login aktif dari jendela lain.</p><button onclick="location.reload()" class="btn btn-primary mt-3 fw-bold px-4 py-2">Muat Ulang Halaman</button></div>`;
+                    return;
+                }
+                localStorage.setItem('artsoft_active_tab', myTabId);
+                localStorage.setItem('artsoft_active_time', Date.now().toString());
+            }
+        }, 2000);
+        return true;
+    }
+
+    let registeredSales = [];
+    function loadSalesList() { 
+        let s = localStorage.getItem('artsoft_sales_list'); 
+        if (s) {
+            try {
+                registeredSales = JSON.parse(s);
+                registeredSales = registeredSales.map(item => ({
+                    code: item.code || '', name: item.name || '', phone: item.phone || '', expiryDate: item.expiryDate || '', canPrint: !!item.canPrint
+                }));
+            } catch(e) { registeredSales = []; }
+        }
+    }
+    function saveSalesList() { localStorage.setItem('artsoft_sales_list', JSON.stringify(registeredSales)); }
+
+    function changeSignatureLogo(inputElement) {
+        let file = inputElement.files[0];
+        if (file) {
+            let reader = new FileReader();
+            reader.onload = function(event) {
+                let sigDataUrl = event.target.result;
+                document.getElementById('adminSignaturePreview').src = sigDataUrl;
+                document.getElementById('adminSignaturePreview').style.display = 'inline-block';
+                document.getElementById('btnRemoveSig').style.display = 'inline-block';
+                localStorage.setItem('savedAppSignature', sigDataUrl);
+                artAlert("Tanda tangan berhasil disimpan!");
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function removeSignature() {
+        localStorage.removeItem('savedAppSignature');
+        document.getElementById('adminSignaturePreview').src = '';
+        document.getElementById('adminSignaturePreview').style.display = 'none';
+        document.getElementById('btnRemoveSig').style.display = 'none';
+        artAlert("Tanda tangan dihapus!");
+    }
+
+    async function openSalesManager() {
+        let pwd = await artPrompt("Masukkan password Admin:");
+        let adminPwd = localStorage.getItem('artsoft_admin_pwd') || "263748";
+        if (pwd === adminPwd) {
+            loadSalesList(); renderSalesList();
+            
+            document.getElementById('adminCompName').value = localStorage.getItem('savedAppName') || 'NAMA PERUSAHAAN, PT';
+            document.getElementById('adminCompAddr').value = localStorage.getItem('savedAppAddress') || 'ALAMAT PERUSAHAAN';
+
+            let savedSig = localStorage.getItem('savedAppSignature');
+            let sigPreview = document.getElementById('adminSignaturePreview');
+            let btnRm = document.getElementById('btnRemoveSig');
+            if(sigPreview && btnRm) {
+                if(savedSig) {
+                    sigPreview.src = savedSig; sigPreview.style.display = 'inline-block'; btnRm.style.display = 'inline-block';
+                } else {
+                    sigPreview.src = ''; sigPreview.style.display = 'none'; btnRm.style.display = 'none';
+                }
+            }
+
+            let savedMsg = localStorage.getItem('artsoft_motivation_msg') || "Selamat bekerja, {nama}! Tetap semangat dan pantang menyerah.";
+            document.getElementById('motivationMsgInput').value = savedMsg;
+            let savedLogoutMsg = localStorage.getItem('artsoft_logout_msg') || "Terimakasih {nama}, sukses dan sehat selalu";
+            document.getElementById('logoutMsgInput').value = savedLogoutMsg;
+            let savedAdminWa = localStorage.getItem('artsoft_admin_wa') || "";
+            let adminWaEl = document.getElementById('adminWaNumber');
+            if(adminWaEl) adminWaEl.value = savedAdminWa;
+            let savedInvoiceNote = localStorage.getItem('artsoft_invoice_note') || "• Barangkali ada retur/selisih harap dikonfirmasi max 1x24 jam.\n• Terima kasih atas kepercayaan dan kerja sama Anda.";
+            let invoiceNoteEl = document.getElementById('invoiceNoteInput');
+            if(invoiceNoteEl) invoiceNoteEl.value = savedInvoiceNote;
+            document.getElementById('salesManagerModal').style.display = 'flex';
+        } else if (pwd !== null) { artAlert("Password salah!"); }
+    }
+
+    function saveInvoiceNote() {
+        let note = document.getElementById('invoiceNoteInput').value;
+        localStorage.setItem('artsoft_invoice_note', note);
+        artAlert("Note Invoice berhasil disimpan!");
+    }
+
+    async function changeAdminPassword() {
+        let newPwd = document.getElementById('newAdminPwd').value.trim();
+        if (newPwd === "") { artAlert("Password baru tidak boleh kosong!"); return; }
+        if (await artConfirm("Anda yakin ingin mengubah password admin menjadi: " + newPwd + " ?")) {
+            localStorage.setItem('artsoft_admin_pwd', newPwd);
+            artAlert("Password admin berhasil diubah!");
+            document.getElementById('newAdminPwd').value = '';
+        }
+    }
+
+    function closeSalesManager() { document.getElementById('salesManagerModal').style.display = 'none'; }
+
+    async function pickContact() {
+        const supported = ('contacts' in navigator && 'ContactsManager' in window);
+        if (supported) {
+            try {
+                const contacts = await navigator.contacts.select(['name', 'tel'], { multiple: false });
+                if (contacts.length > 0) {
+                    let contact = contacts[0];
+                    if (contact.name && contact.name.length > 0) document.getElementById('newSalesName').value = contact.name[0];
+                    if (contact.tel && contact.tel.length > 0) {
+                        let phone = String(contact.tel[0]).replace(/\D/g, '');
+                        if (phone.startsWith('08')) phone = '628' + phone.substring(2);
+                        else if (phone.startsWith('8') && phone.length > 6) phone = '628' + phone.substring(1);
+                        else if (phone.startsWith('0')) phone = '62' + phone.substring(1);
+                        document.getElementById('newSalesPhone').value = phone;
+                    }
+                }
+            } catch (ex) { artAlert("Pemilihan kontak dibatalkan atau izin akses tidak diberikan."); }
+        } else { artAlert("Browser HP Anda tidak mendukung API Kontak otomatis."); }
+    }
+
+    function saveAdminWA() {
+        let wa = document.getElementById('adminWaNumber').value.trim().replace(/\D/g, '');
+        if (wa.startsWith('08')) wa = '628' + wa.substring(2);
+        else if (wa.startsWith('8')) wa = '628' + wa.substring(1);
+        localStorage.setItem('artsoft_admin_wa', wa);
+        artAlert("Nomor WA Admin berhasil disimpan!");
+    }
+    
+    async function kirimLaporanPDF() {
+        if (transactionData.length === 0) { artAlert('Tidak ada data yang dapat dikirim!'); return; }
+        let checkedBoxes = Array.from(document.querySelectorAll('.export-checkbox:checked')).map(cb => cb.value);
+        if (checkedBoxes.length === 0) { artAlert('Pilih minimal 1 nota untuk dikirim ke Laporan!'); return; }
+        
+        let salesId = document.getElementById('salesId').value.trim() || "000";
+        loadSalesList();
+        let foundSales = registeredSales.find(s => s.code === salesId);
+        let sName = foundSales ? foundSales.name : salesId;
+        let filteredData = transactionData.filter(row => checkedBoxes.includes(row.orderNo));
+        
+        let summaryDataMap = {};
+        let grandTotalAll = 0;
+        let grandTotalGross = 0;
+        let grandTotalDisc = 0;
+        
+        let storeGroupMap = {};
+        filteredData.forEach(item => {
+            let key = item.custName || "CUSTOMER";
+            if(!storeGroupMap[key]) {
+                storeGroupMap[key] = {
+                    custName: item.custName,
+                    orderNo: item.orderNo,
+                    items: []
+                };
+            }
+            storeGroupMap[key].items.push(item);
+
+            if(!summaryDataMap[item.orderNo]) {
+                summaryDataMap[item.orderNo] = {
+                    orderNo: item.orderNo,
+                    tanggal: item.dateYY,
+                    toko: item.custName,
+                    totalItem: 0,
+                    totalBayar: 0
+                };
+            }
+            let subtotal = parseFloat(item.subtotal || 0);
+            summaryDataMap[item.orderNo].totalItem += 1;
+            summaryDataMap[item.orderNo].totalBayar += subtotal;
+            grandTotalAll += subtotal;
+        });
+
+        let summaryHtmlRows = "";
+        Object.values(summaryDataMap).forEach(row => {
+            summaryHtmlRows += `<tr style="border-bottom: 1px solid #cbd5e1; page-break-inside: avoid; break-inside: avoid;"><td style="padding:5px 3px; text-align:center;">${row.orderNo}</td><td style="padding:5px 3px; text-align:center;">${row.tanggal}</td><td style="padding:5px 3px;">${row.toko}</td><td style="padding:5px 3px; text-align:center;">${row.totalItem}</td><td style="padding:5px 3px; text-align:right;">${row.totalBayar.toLocaleString('id-ID')}</td></tr>`;
+        });
+
+        let detailHtmlSections = "";
+        Object.values(storeGroupMap).forEach(group => {
+            let storeGross = 0;
+            let storeDisc = 0;
+            let storeTotal = 0;
+            let storeItemRows = "";
+
+            group.items.forEach(item => {
+                let foundProd = masterProduk.find(p => p.kode === item.produkCode);
+                let namaBarang = foundProd ? foundProd.nama : item.produkCode;
+                let hargaSatuan = foundProd ? parseFloat(foundProd.harga) : 0;
+                
+                let q1Str = item.q1 > 0 ? `${item.q1} ${item.uom1 || ''}` : '';
+                let q2Str = item.q2 > 0 ? `${item.q2} ${item.uom2 || ''}` : '';
+                let q3Str = item.q3 > 0 ? `${item.q3} ${item.uom3 || ''}` : '';
+                let qtyCol = [q1Str, q2Str, q3Str].filter(Boolean).join(' | ');
+
+                let totalPcs = (item.q1 * (item.conv1 > 1 ? item.conv1 : 1)) + (item.q2 * (item.conv2 > 1 ? item.conv2 : 1)) + item.q3;
+                let grossItem = totalPcs * hargaSatuan;
+                let subtotal = parseFloat(item.subtotal || 0);
+                let discItemVal = grossItem - subtotal;
+                if(discItemVal < 0) discItemVal = 0;
+
+                storeGross += grossItem;
+                storeDisc += discItemVal;
+                storeTotal += subtotal;
+
+                grandTotalGross += grossItem;
+                grandTotalDisc += discItemVal;
+
+                storeItemRows += `<tr style="border-bottom: 1px solid #e2e8f0; page-break-inside: avoid; break-inside: avoid;">
+                    <td style="padding:4px 3px; text-align:center; font-weight:600;">${item.produkCode}</td>
+                    <td style="padding:4px 3px;">${namaBarang}</td>
+                    <td style="padding:4px 3px; text-align:right;">${hargaSatuan.toLocaleString('id-ID')}</td>
+                    <td style="padding:4px 3px; text-align:right;">${qtyCol}</td>
+                    <td style="padding:4px 3px; text-align:center;">${(item.bonus && item.bonus > 0) ? item.bonus + ' ' + (item.uom3||'Pcs') : '-'}</td>
+                    <td style="padding:4px 3px; text-align:center;">${item.discPersen || '0'}%</td>
+                    <td style="padding:4px 3px; text-align:right;">${parseFloat(item.discRp || 0).toLocaleString('id-ID')}</td>
+                    <td style="padding:4px 3px; text-align:right; font-weight:700;">${subtotal.toLocaleString('id-ID')}</td>
+                </tr>`;
+            });
+
+            detailHtmlSections += `
+            <div style="margin-bottom: 12px; page-break-inside: avoid; break-inside: avoid; display: block;">
+                <div style="font-weight: 800; background: #e2e8f0; color: #0f172a; padding: 4px 6px; font-size: 10px; border-left: 4px solid #2563eb; margin-bottom: 3px; page-break-inside: avoid; break-inside: avoid;">
+                    ${group.custName} (Nota: ${group.orderNo})
+                </div>
+                <table style="width: 100%; border-collapse: collapse; font-size: 9.5px; margin-bottom: 3px; page-break-inside: avoid; break-inside: avoid;">
+                    <thead>
+                        <tr style="background-color: #f8fafc; font-weight: bold; border-bottom: 1.5px solid #0f172a; page-break-inside: avoid; break-inside: avoid;">
+                            <th style="padding:4px 3px; text-align:center; width: 10%;">KODE</th>
+                            <th style="padding:4px 3px; text-align:center; width: 32%;">NAMA BARANG</th>
+                            <th style="padding:4px 3px; text-align:center; width: 11%;">HARGA JUAL</th>
+                            <th style="padding:4px 3px; text-align:center; width: 12%;">QTY</th>
+                            <th style="padding:4px 3px; text-align:center; width: 9%;">BONUS</th>
+                            <th style="padding:4px 3px; text-align:center; width: 8%;">DISC (%)</th>
+                            <th style="padding:4px 3px; text-align:center; width: 10%;">DISC RP</th>
+                            <th style="padding:4px 3px; text-align:center; width: 13%;">TOTAL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${storeItemRows}
+                        <tr style="font-weight: bold; background-color: #f1f5f9; border-top: 1px solid #cbd5e1; page-break-inside: avoid; break-inside: avoid;">
+                            <td colspan="7" style="padding: 4px 5px; text-align: right;">Total Gross / Diskon / Rupiah Toko:</td>
+                            <td style="padding: 4px 5px; text-align: right; color: #0f172a;">Rp ${storeTotal.toLocaleString('id-ID')}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>`;
+        });
+
+        let pdfHtml = `
+        <div style="font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 10px; padding: 10px 15px; color: #1e293b; background: #fff;">
+            <h2 style="text-align: center; margin-bottom: 3px; font-weight: 800; color: #0f172a; font-size: 14px;">LAPORAN REKAP ORDER</h2>
+            <p style="text-align: center; margin-top: 0; font-size: 11px; margin-bottom: 12px;">Sales: <b style="color: #2563eb;">${sName} (${salesId})</b></p>
+            
+            <div style="page-break-inside: avoid; break-inside: avoid; margin-bottom: 15px;">
+                <h4 style="margin-bottom: 6px; background: #0f172a; color: #fff; padding: 5px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; page-break-after: avoid; break-after: avoid;">1. REKAP NOTA</h4>
+                <table style="width: 100%; border-collapse: collapse; font-size: 10px; page-break-inside: avoid; break-inside: avoid;">
+                    <thead style="background-color: #f1f5f9; font-weight: bold; border-bottom: 2px solid #0f172a; page-break-inside: avoid; break-inside: avoid;">
+                        <tr>
+                            <th style="padding:6px 3px; text-align:center;">No. Order</th>
+                            <th style="padding:6px 3px; text-align:center;">Tanggal</th>
+                            <th style="padding:6px 3px; text-align:center;">Toko / Customer</th>
+                            <th style="padding:6px 3px; text-align:center;">Total Item</th>
+                            <th style="padding:6px 3px; text-align:center;">Total Bayar Rp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${summaryHtmlRows}
+                        <tr style="font-weight:bold; background-color:#e2e8f0; border-top: 2px solid #0f172a; page-break-inside: avoid; break-inside: avoid;">
+                            <td colspan="4" style="padding:6px 3px; text-align:right;">GRAND TOTAL</td>
+                            <td style="padding:6px 3px; text-align:right; color:#dc2626; font-size: 11px;">Rp ${grandTotalAll.toLocaleString('id-ID')}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="page-break-inside: avoid; break-inside: avoid; margin-top: 10px;">
+                <h4 style="margin-bottom: 8px; background: #0f172a; color: #fff; padding: 5px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; page-break-before: auto; page-break-after: avoid; break-after: avoid;">2. DETAIL BARANG PER TOKO</h4>
+                ${detailHtmlSections}
+            </div>
+
+            <div style="margin-top: 12px; padding: 8px 10px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 10.5px; font-weight: bold; display: flex; justify-content: space-between; page-break-inside: avoid; break-inside: avoid;">
+                <span>GRAND TOTAL KESELURUHAN:</span>
+                <span style="color: #dc2626; font-size: 11.5px;">Rp ${grandTotalAll.toLocaleString('id-ID')}</span>
+            </div>
+        </div>
+        `;
+
+        let printContainer = document.getElementById('printArea');
+        printContainer.innerHTML = pdfHtml;
+        printContainer.style.cssText = "display: block !important; background: white; color: black; width: 100%; min-height: 100vh; position: relative; z-index: 99999;";
+        
+        let dObj = new Date();
+        let dd = String(dObj.getDate()).padStart(2, '0');
+        let mm = String(dObj.getMonth()+1).padStart(2, '0');
+        let yy = String(dObj.getFullYear()).slice(-2);
+        let last3Sales = salesId.length >= 3 ? salesId.slice(-3) : salesId.padStart(3, '0');
+        let fileName = `Laporan_Order_${last3Sales}_${dd}${mm}${yy}.pdf`;
+
+        let mainApp = document.getElementById('mainApp');
+        let originalDisplay = mainApp.style.cssText;
+        mainApp.style.cssText = "display: none !important;";
+
+        html2pdf().set({ 
+            margin: [8, 8, 8, 8], 
+            filename: fileName, 
+            image: { type: 'jpeg', quality: 1 }, 
+            html2canvas: { scale: 2, useCORS: true, scrollY: 0 }, 
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+            pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', 'div', 'table', 'h4'] }
+        }).from(printContainer).outputPdf('blob').then(pdfBlob => {
+            printContainer.style.cssText = "display: none !important;";
+            printContainer.innerHTML = '';
+            mainApp.style.cssText = originalDisplay;
+            
+            let file = new File([pdfBlob], fileName, { type: 'application/pdf' });
+            
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                navigator.share({ files: [file], title: 'Laporan Order', text: 'Berikut Laporan Order PDF yang dipilih.' }).catch(() => {
+                    let link = document.createElement('a'); link.href = URL.createObjectURL(pdfBlob); link.download = fileName;
+                    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+                });
+            } else {
+                let link = document.createElement('a'); link.href = URL.createObjectURL(pdfBlob); link.download = fileName;
+                document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            }
+
+            document.querySelectorAll('.export-checkbox').forEach(cb => cb.checked = false);
+            updateBottomBar();
+        }).catch(() => {
+            printContainer.style.cssText = "display: none !important;";
+            mainApp.style.cssText = originalDisplay;
+            artAlert("Gagal membuat PDF Laporan.");
+        });
+    }
+
+    function renderSalesList() {
+        let container = document.getElementById('salesListContainer');
+        container.innerHTML = '';
+        if(registeredSales.length === 0) { container.innerHTML = '<li class="list-group-item text-center text-muted">Belum ada data sales</li>'; return; }
+        registeredSales.forEach((s, idx) => {
+            let li = document.createElement('li');
+            li.className = 'list-group-item d-flex justify-content-between align-items-center p-2';
+            let expiryText = s.expiryDate ? `<br><small class="text-danger">Masa Aktif s/d: ${s.expiryDate}</small>` : `<br><small class="text-muted">Masa Aktif: Selamanya / Tanpa Batas</small>`;
+            let printCheck = s.canPrint ? "checked" : "";
+            li.innerHTML = `<div><span><b>${s.code}</b> - ${s.name}</span><br><small class="text-muted">📞 ${s.phone || 'Tanpa No HP'}</small>${expiryText}
+                <div class="form-check mt-1">
+                    <input class="form-check-input" type="checkbox" onchange="toggleSalesPrint(${idx}, this.checked)" id="printCheck${idx}" ${printCheck}>
+                    <label class="form-check-label text-primary fw-bold" style="font-size:0.75rem;" for="printCheck${idx}">Akses Cetak Invoice</label>
+                </div>
+            </div>
+            <div class="d-flex gap-1 flex-column align-items-end">
+                <div class="d-flex gap-1">
+                    <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="editSalesExpiry(${idx})" title="Ubah Masa Aktif">Edit</button>
+                    <button class="btn btn-sm btn-outline-danger py-0 px-2 fw-bold" onclick="deleteSales(${idx})">X</button>
+                </div>
+            </div>`;
+            container.appendChild(li);
+        });
+    }
+
+    function toggleSalesPrint(idx, val) {
+        registeredSales[idx].canPrint = val;
+        saveSalesList();
+    }
+
+    async function editSalesExpiry(idx) {
+        let s = registeredSales[idx];
+        let currentExp = s.expiryDate || "";
+        let newExp = await artPrompt(`Masukkan tanggal terakhir aktif (YYYY-MM-DD) untuk Sales ${s.name} (${s.code}):\nKosongkan jika tanpa batas waktu.`, currentExp);
+        if (newExp !== null) {
+            s.expiryDate = newExp.trim();
+            saveSalesList(); renderSalesList();
+            artAlert("Masa aktif sales berhasil diperbarui!");
+        }
+    }
+
+    function addSales() {
+        let code = document.getElementById('newSalesCode').value.trim();
+        let name = document.getElementById('newSalesName').value.trim();
+        let phone = document.getElementById('newSalesPhone').value.trim();
+        let expiryDate = document.getElementById('newSalesExpiry').value;
+        let canPrint = document.getElementById('newSalesPrint').checked;
+        
+        if(!code || !name) { artAlert("Kode dan Nama wajib diisi!"); return; }
+        if(registeredSales.find(s => s.code === code)) { artAlert("Kode Sales sudah ada!"); return; }
+        
+        registeredSales.push({code, name, phone, expiryDate, canPrint});
+        saveSalesList(); renderSalesList();
+        
+        document.getElementById('newSalesCode').value = '';
+        document.getElementById('newSalesName').value = '';
+        document.getElementById('newSalesPhone').value = '';
+        document.getElementById('newSalesExpiry').value = '';
+        document.getElementById('newSalesPrint').checked = false;
+    }
+
+    async function deleteSales(idx) {
+        if(await artConfirm("Hapus sales ini dari daftar?")) { registeredSales.splice(idx, 1); saveSalesList(); renderSalesList(); }
+    }
+
+    function saveMotivationMsg() {
+        localStorage.setItem('artsoft_motivation_msg', document.getElementById('motivationMsgInput').value.trim());
+        artAlert("Pesan motivasi berhasil disimpan!");
+    }
+
+    function playAudioMotivation(salesName) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            let hour = new Date().getHours();
+            let waktu = (hour >= 4 && hour < 11) ? "Selamat pagi" : (hour >= 11 && hour < 15) ? "Selamat siang" : (hour >= 15 && hour < 18) ? "Selamat sore" : "Selamat malam";
+            let msgTemplate = localStorage.getItem('artsoft_motivation_msg') || "{waktu} {nama}, tetap semangat dan sukses selalu";
+            let finalMsg = msgTemplate.replace(/{waktu}/g, waktu).replace(/{salam}/g, waktu).replace(/{nama}/g, salesName);
+            
+            let speakNow = () => {
+                window.speechSynthesis.cancel();
+                let utterance = new SpeechSynthesisUtterance(finalMsg);
+                utterance.lang = 'id-ID';
+                let voices = window.speechSynthesis.getVoices();
+                let idVoice = voices.find(v => v.lang === 'id-ID' || v.lang.startsWith('id'));
+                if (idVoice) utterance.voice = idVoice;
+                window.speechSynthesis.speak(utterance);
+            };
+
+            if (window.speechSynthesis.getVoices().length === 0) {
+                let voiceHandler = () => {
+                    speakNow();
+                    window.speechSynthesis.removeEventListener('voiceschanged', voiceHandler);
+                };
+                window.speechSynthesis.addEventListener('voiceschanged', voiceHandler);
+            } else { speakNow(); }
+        }
+    }
+
+    function clearProductSelection() {
+        document.getElementById('inputProdSearch').value = '';
+        document.getElementById('inputProdCode').value = '';
+        document.getElementById('inputHargaSatuanMaster').value = '0';
+        document.getElementById('prodStockInfo').innerText = '';
+        document.getElementById('inputQty1').value = '0';
+        document.getElementById('inputQty2').value = '0';
+        document.getElementById('inputQty3').value = '0';
+        document.getElementById('inputDiscP').value = '0%';
+        document.getElementById('inputDiscRp').value = '0';
+        document.getElementById('inputHarga').value = '0';
+        document.getElementById('inputHarga').setAttribute('data-raw', '0');
+        document.getElementById('inputSubtotal').value = '0';
+        document.getElementById('lblSatuan1').innerText = 'Krt';
+        document.getElementById('lblSatuan2').innerText = 'Pak';
+        document.getElementById('lblSatuan3').innerText = 'Pcs';
+        document.getElementById('inputBonus').value = '0';
+        document.getElementById('lblSatuanBonus').innerText = 'Pcs';
+        document.getElementById('inputProdSearch').focus();
+    }
+
+    async function deleteOrder(orderNoToDel) {
+        if(await artConfirm(`Yakin ingin menghapus nota ${orderNoToDel} secara permanen?`)) {
+            let itemsToDel = transactionData.filter(item => item.orderNo === orderNoToDel);
+            itemsToDel.forEach(item => {
+                let foundProd = masterProduk.find(p => p.kode === item.produkCode);
+                if (foundProd) {
+                    let totalPcs = (item.q1 * (item.conv1 > 1 ? item.conv1 : 1)) + (item.q2 * (item.conv2 > 1 ? item.conv2 : 1)) + item.q3;
+                    let totalDeduct = totalPcs + (item.bonus || 0);
+                    foundProd.stock = (parseFloat(foundProd.stock) || 0) + totalDeduct;
+                }
+            });
+            try { localStorage.setItem('artsoft_masterProd', JSON.stringify(masterProduk)); } catch(e) {}
+
+            transactionData = transactionData.filter(item => item.orderNo !== orderNoToDel);
+            saveTransactionsToLocal(); renderSummaryTable();
+            if(isEditingMode && document.getElementById('orderNo').value === orderNoToDel) resetFormOnly();
+        }
+    }
+
+    function saveDefaultServerUrl() {
+        localStorage.setItem('artsoft_master_url', document.getElementById('masterServerUrl').value.trim());
+        artAlert("Link server/grup berhasil disimpan!");
+    }
+
+    async function syncMasterFromUrl() {
+        let baseUrl = document.getElementById('masterServerUrl').value.trim() || localStorage.getItem('artsoft_master_url');
+        if (!baseUrl) { artAlert("Masukkan terlebih dahulu URL / Link folder atau file master Excel kantor!"); return; }
+        let statusCust = document.getElementById('statusCustomer');
+        let statusProd = document.getElementById('statusProduk');
+        statusCust.className = 'text-primary fw-bold mb-1'; statusCust.innerText = '⏳ Mengambil...';
+        statusProd.className = 'text-primary fw-bold mb-1'; statusProd.innerText = '⏳ Mengambil...';
+        try {
+            let custUrl = baseUrl.endsWith('/') ? baseUrl + 'CUSTOMER.xlsx' : baseUrl + '/CUSTOMER.xlsx';
+            let prodUrl = baseUrl.endsWith('/') ? baseUrl + 'PRODUK.xlsx' : baseUrl + '/PRODUK.xlsx';
+            let resCust = await fetch(custUrl);
+            let bufCust = await resCust.arrayBuffer();
+            let wbCust = XLSX.read(new Uint8Array(bufCust), {type: 'array'});
+            masterCustomer = XLSX.utils.sheet_to_json(wbCust.Sheets[wbCust.SheetNames[0]]).map(row => ({
+                kode: getCellValue(row, ['custno', 'custid', 'kode']),
+                nama: getCellValue(row, ['custname', 'namatoko', 'nama']),
+                alamat: getCellValue(row, ['address1', 'address', 'alamat'])
+            })).filter(c => c.nama !== "");
+            if (masterCustomer.length > 0) {
+                statusCust.className = 'text-success fw-bold mb-1'; statusCust.innerText = `✔️ ${masterCustomer.length} Data (Sync)`;
+                localStorage.setItem('artsoft_masterCust', JSON.stringify(masterCustomer));
+                initCustomerAutocomplete();
+            }
+            let resProd = await fetch(prodUrl);
+            let bufProd = await resProd.arrayBuffer();
+            let wbProd = XLSX.read(new Uint8Array(bufProd), {type: 'array'});
+            masterProduk = XLSX.utils.sheet_to_json(wbProd.Sheets[wbProd.SheetNames[0]]).map(row => ({
+                kode: getCellValue(row, ['pcode', 'kodeproduk', 'kode']),
+                barcode: cleanBarcode(getCellValue(row, ['barcode', 'barcodes', 'ean', 'upc', 'kodebar', 'codebar'])),
+                nama: getCellValue(row, ['namabarang', 'namaproduk', 'nama', 'produk']),
+                uom1: getCellValue(row, ['uom1']), uom2: getCellValue(row, ['uom2']), uom3: getCellValue(row, ['uom3']),
+                conv1: parseFloat(getCellValue(row, ['convfact1', 'conv1'])) || 1,
+                conv2: parseFloat(getCellValue(row, ['convfact2', 'conv2'])) || 1,
+                harga: parseFloat(getCellValue(row, ['harga', 'price', 'hargajual'])) || 0,
+                stock: parseFloat(getCellValue(row, ['stock', 'stok', 'akhirstock', 'stockakhir'])) || 0
+            })).filter(p => p.nama !== "");
+            if (masterProduk.length > 0) {
+                statusProd.className = 'text-success fw-bold mb-1'; statusProd.innerText = `✔️ ${masterProduk.length} Data (Sync)`;
+                localStorage.setItem('artsoft_masterProd', JSON.stringify(masterProduk));
+                initProductAutocomplete();
+            }
+            artAlert("Sinkronisasi Master Customer & Produk berhasil!");
+            toggleMasterUploadPanel();
+        } catch (err) {
+            statusCust.className = 'text-danger fw-bold mb-1'; statusCust.innerText = '❌ Gagal Sync';
+            statusProd.className = 'text-danger fw-bold mb-1'; statusProd.innerText = '❌ Gagal Sync';
+            artAlert("Gagal melakukan sync otomatis.");
+        }
+    }
+
+    function setThemeColor(bgColor, textColorHeader) {
+        document.body.style.backgroundColor = bgColor;
+        let loginScr = document.getElementById('loginScreen');
+        if (loginScr) loginScr.style.background = (bgColor === '#2b3035' || bgColor === '#212529') ? '#212529' : `linear-gradient(135deg, ${bgColor} 0%, #333333 100%)`;
+        localStorage.setItem('artsoft_theme_bg', bgColor);
+        localStorage.setItem('artsoft_theme_header', textColorHeader);
+        artAlert("Tema warna background berhasil diubah!");
+    }
+
+    function loadThemeColor() {
+        let savedBg = localStorage.getItem('artsoft_theme_bg');
+        if (savedBg) {
+            document.body.style.backgroundColor = savedBg;
+            let loginScr = document.getElementById('loginScreen');
+            if (loginScr) loginScr.style.background = (savedBg === '#2b3035') ? '#212529' : `linear-gradient(135deg, ${savedBg} 0%, #333333 100%)`;
+        }
+    }
+
+    function loadCompanyData() {
+        let savedLogo = localStorage.getItem('savedAppLogo');
+        let savedName = localStorage.getItem('savedAppName') || 'NAMA PERUSAHAAN, PT';
+        let savedAddress = localStorage.getItem('savedAppAddress') || 'ALAMAT PERUSAHAAN';
+        
+        if (savedLogo) { document.getElementById('companyLogo').src = savedLogo; let l = document.getElementById('loginCompanyLogo'); if(l) l.src = savedLogo; }
+        document.getElementById('companyName').innerText = savedName; let l = document.getElementById('loginCompanyName'); if(l) l.innerText = savedName; 
+        document.getElementById('companyAddress').innerText = savedAddress; let a = document.getElementById('loginCompanyAddress'); if(a) a.innerText = savedAddress; 
+    }
+
+    function saveLogoutMsg() {
+        localStorage.setItem('artsoft_logout_msg', document.getElementById('logoutMsgInput').value.trim());
+        artAlert("Pesan suara logout berhasil disimpan!");
+    }
+
+    function changeCompanyLogo(inputElement) {
+        let file = inputElement.files[0];
+        if (file) {
+            let reader = new FileReader();
+            reader.onload = function(event) {
+                let logoDataUrl = event.target.result;
+                document.getElementById('companyLogo').src = logoDataUrl;
+                let loginLogo = document.getElementById('loginCompanyLogo'); if(loginLogo) loginLogo.src = logoDataUrl;
+                localStorage.setItem('savedAppLogo', logoDataUrl);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function saveCompanyProfile() {
+        let newName = document.getElementById('adminCompName').value.trim();
+        let newAddr = document.getElementById('adminCompAddr').value.trim();
+        
+        if (newName !== "") {
+            document.getElementById('companyName').innerText = newName;
+            let loginName = document.getElementById('loginCompanyName'); if(loginName) loginName.innerText = newName;
+            localStorage.setItem('savedAppName', newName);
+        }
+        
+        if (newAddr !== "") {
+            document.getElementById('companyAddress').innerText = newAddr;
+            let loginAddr = document.getElementById('loginCompanyAddress'); if(loginAddr) loginAddr.innerText = newAddr;
+            localStorage.setItem('savedAppAddress', newAddr);
+        }
+        artAlert("Profil Perusahaan berhasil disimpan!");
+    }
+
+    function applyCustomThemeColor() {
+        let hexColor = document.getElementById('customColorText').value.trim();
+        if(!hexColor.startsWith('#')) hexColor = '#' + hexColor;
+        setThemeColor(hexColor, '#212529');
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        let cp = document.getElementById('customColorPicker');
+        let ct = document.getElementById('customColorText');
+        if(cp && ct) {
+            cp.addEventListener('input', () => ct.value = cp.value);
+            ct.addEventListener('input', () => { if(ct.value.startsWith('#') || ct.value.length === 6) cp.value = ct.value.startsWith('#') ? ct.value : '#' + ct.value; });
+        }
+        if (!initSingleInstanceCheck()) return;
+        try {
+            if (typeof XLSX === 'undefined' || typeof jQuery === 'undefined') document.getElementById('errorBanner').style.display = 'block';
+            loadSalesList(); checkLoginStatus(); loadCompanyData(); loadThemeColor();
+            let savedUrl = localStorage.getItem('artsoft_master_url');
+            if(savedUrl) document.getElementById('masterServerUrl').value = savedUrl;
+            loadMasterDataFromLocal(); loadTransactionsFromLocal(); initDefaultDate(); generateOrderNo();
+            document.getElementById('uploadCustomer').addEventListener('change', handleUploadCustomer);
+            document.getElementById('uploadProduk').addEventListener('change', handleUploadProduk);
+            document.getElementById('soForm').addEventListener('submit', handleFormSubmit);
+        } catch (error) { artAlert("Error inited: " + error.message); }
+    });
+
+    function updateBottomBar(currentTotal = 0) {
+        let labelEl = document.getElementById('bottomTotalLabel');
+        let valueEl = document.getElementById('bottomTotalValue');
+        if (currentSessionItems.length > 0) {
+            labelEl.innerText = "Total Nota Ini"; labelEl.className = "d-block text-primary fw-bold";
+            valueEl.innerText = 'Rp ' + currentTotal.toLocaleString('id-ID');
+        } else {
+            let checkedBoxes = Array.from(document.querySelectorAll('.export-checkbox:checked')).map(cb => cb.value);
+            if (checkedBoxes.length > 0) {
+                let checkedTotal = 0;
+                transactionData.forEach(item => { if (checkedBoxes.includes(item.orderNo)) checkedTotal += parseFloat(item.subtotal || 0); });
+                labelEl.innerText = `Total (${checkedBoxes.length} Nota Dipilih)`; labelEl.className = "d-block text-success fw-bold";
+                valueEl.innerText = 'Rp ' + checkedTotal.toLocaleString('id-ID');
+            } else {
+                labelEl.innerText = "Total Semua Nota"; labelEl.className = "d-block text-secondary fw-bold";
+                let grandTotalAll = transactionData.reduce((sum, item) => sum + parseFloat(item.subtotal || 0), 0);
+                valueEl.innerText = 'Rp ' + grandTotalAll.toLocaleString('id-ID');
+            }
+        }
+    }
+
+    function saveTransactionsToLocal() {
+        let salesId = document.getElementById('salesId').value.trim() || localStorage.getItem('savedSalesId') || "000";
+        localStorage.setItem(`artsoft_saved_transactions_${salesId}`, JSON.stringify(transactionData));
+    }
+
+    function loadTransactionsFromLocal() {
+        let salesId = document.getElementById('salesId').value.trim() || localStorage.getItem('savedSalesId') || "000";
+        let saved = localStorage.getItem(`artsoft_saved_transactions_${salesId}`);
+        if (saved) { try { transactionData = JSON.parse(saved); renderSummaryTable(); } catch(e) {} } else { transactionData = []; renderSummaryTable(); }
+    }
+
+    function toggleMasterUploadPanel() {
+        let panel = document.getElementById('masterUploadPanel');
+        panel.style.display = (panel.style.display === 'none') ? 'block' : 'none';
+    }
+
+    function checkLoginStatus() {
+        let savedSalesId = localStorage.getItem('savedSalesId');
+        if (savedSalesId) {
+            loadSalesList();
+            let found = registeredSales.find(s => s.code === savedSalesId);
+            if (found && found.expiryDate) {
+                let todayStr = new Date().toISOString().split('T')[0];
+                if (todayStr > found.expiryDate) {
+                    artAlert(`Masa aktif untuk Sales ${found.name} (${savedSalesId}) telah habis pada ${found.expiryDate}. Silakan hubungi Admin.`);
+                    localStorage.removeItem('savedSalesId'); showLogin(); return;
+                }
+            }
+            showApp(savedSalesId);
+        } else { showLogin(); }
+    }
+
+    function processLogin() {
+        let sid = document.getElementById('loginSalesIdInput').value.trim();
+        if (sid === "") { artAlert("Harap masukkan Kode Sales!"); return; }
+        loadSalesList();
+        if (registeredSales.length > 0) {
+            let found = registeredSales.find(s => s.code === sid);
+            if (!found) { artAlert("Akses Ditolak! Kode Sales belum terdaftar."); return; }
+            if (found.expiryDate) {
+                let todayStr = new Date().toISOString().split('T')[0];
+                if (todayStr > found.expiryDate) { artAlert(`Akses Ditolak! Masa aktif akun ini telah berakhir pada tanggal ${found.expiryDate}.`); return; }
+            }
+        } else { artAlert("Daftar Sales masih kosong!"); return; }
+        localStorage.setItem('savedSalesId', sid);
+        localStorage.setItem('lastSalesId', sid);
+        localStorage.setItem('artsoft_active_tab', myTabId);
+        localStorage.setItem('artsoft_active_time', Date.now().toString());
+        showApp(sid); generateOrderNo();
+        let foundSales = registeredSales.find(s => s.code === sid);
+        if(foundSales && foundSales.name) playAudioMotivation(foundSales.name);
+    }
+
+    function playAudioLogout(salesName) {
+        return new Promise(resolve => {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                let msgTemplate = localStorage.getItem('artsoft_logout_msg') || "Terimakasih {nama}, sukses dan sehat selalu";
+                let finalMsg = msgTemplate.replace(/{nama}/g, salesName);
+                let utterance = new SpeechSynthesisUtterance(finalMsg);
+                utterance.lang = 'id-ID';
+                utterance.onend = resolve;
+                utterance.onerror = resolve;
+                let voices = window.speechSynthesis.getVoices();
+                let idVoice = voices.find(v => v.lang === 'id-ID' || v.lang.startsWith('id'));
+                if (idVoice) utterance.voice = idVoice;
+                window.speechSynthesis.speak(utterance);
+                setTimeout(resolve, 3500);
+            } else {
+                resolve();
+            }
+        });
+    }
+
+    async function processLogout() {
+        if (await artConfirm("Anda yakin ingin keluar dari aplikasi? (Data transaksi tidak akan hilang)")) {
+            let sid = document.getElementById('salesId').value.trim() || localStorage.getItem('savedSalesId') || "";
+            loadSalesList();
+            let foundSales = registeredSales.find(s => s.code === sid);
+            let sName = foundSales ? foundSales.name : sid;
+            
+            await playAudioLogout(sName);
+            
+            localStorage.removeItem('savedSalesId'); 
+            localStorage.removeItem('artsoft_active_tab'); 
+            localStorage.removeItem('artsoft_active_time');
+            window.close();
+            window.location.replace('about:blank');
+        }
+    }
+
+    function showApp(sid) {
+        document.getElementById('loginScreen').style.cssText = "display: none !important; min-height: 100vh; max-width: 400px;";
+        document.getElementById('mainApp').style.cssText = "display: block !important;";
+        document.getElementById('salesId').value = sid;
+        
+        loadSalesList();
+        
+        let printRow = document.getElementById('printShareButtonsRow');
+        if (printRow) {
+            let foundSales = registeredSales.find(s => s.code === sid);
+            if (foundSales && foundSales.canPrint) {
+                printRow.style.display = 'flex';
+            } else {
+                printRow.style.display = 'none';
+            }
+        }
+        
+        loadTransactionsFromLocal();
+    }
+
+    function showLogin() {
+        document.getElementById('mainApp').style.cssText = "display: none !important;";
+        document.getElementById('loginScreen').style.cssText = "display: flex !important; min-height: 100vh; max-width: 400px; flex-direction: column; justify-content: center; align-items: center;";
+        let lastSid = localStorage.getItem('lastSalesId');
+        if (lastSid) document.getElementById('loginSalesIdInput').value = lastSid;
+    }
+
+    function loadMasterDataFromLocal() {
+        try {
+            let savedCust = localStorage.getItem('artsoft_masterCust');
+            if (savedCust) {
+                masterCustomer = JSON.parse(savedCust);
+                document.getElementById('statusCustomer').className = 'text-success fw-bold mb-1';
+                document.getElementById('statusCustomer').innerText = `✔️ ${masterCustomer.length} Data (Memori)`;
+                if (typeof jQuery !== 'undefined' && typeof jQuery.ui !== 'undefined') initCustomerAutocomplete();
+            }
+            let savedProd = localStorage.getItem('artsoft_masterProd');
+            if (savedProd) {
+                masterProduk = JSON.parse(savedProd);
+                document.getElementById('statusProduk').className = 'text-success fw-bold mb-1';
+                document.getElementById('statusProduk').innerText = `✔️ ${masterProduk.length} Data (Memori)`;
+                if (typeof jQuery !== 'undefined' && typeof jQuery.ui !== 'undefined') initProductAutocomplete();
+            }
+        } catch (e) {}
+    }
+
+    function getCellValue(row, keywords) {
+        const keys = Object.keys(row);
+        for (let kw of keywords) {
+            let foundKey = keys.find(k => String(k).toLowerCase().replace(/[^a-z0-9]/g, '').includes(String(kw).toLowerCase().replace(/[^a-z0-9]/g, '')));
+            if (foundKey && row[foundKey] !== undefined && row[foundKey] !== null) return String(row[foundKey]).trim();
+        }
+        return "";
+    }
+
+    function handleUploadCustomer(e) {
+        let file = e.target.files[0];
+        if (!file) return;
+        let statusEl = document.getElementById('statusCustomer');
+        statusEl.className = 'text-primary fw-bold mb-1'; statusEl.innerText = '⏳ Loading...';
+        let reader = new FileReader();
+        reader.onload = function(evt) {
+            try {
+                let workbook = XLSX.read(new Uint8Array(evt.target.result), {type: 'array'});
+                masterCustomer = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]).map(row => ({
+                    kode: getCellValue(row, ['custno', 'custid', 'kode']),
+                    nama: getCellValue(row, ['custname', 'namatoko', 'nama']),
+                    alamat: getCellValue(row, ['address1', 'address', 'alamat'])
+                })).filter(c => c.nama !== "");
+                if (masterCustomer.length > 0) {
+                    statusEl.className = 'text-success fw-bold mb-1'; statusEl.innerText = `✔️ ${masterCustomer.length} Data (Baru)`;
+                    localStorage.setItem('artsoft_masterCust', JSON.stringify(masterCustomer));
+                    initCustomerAutocomplete(); toggleMasterUploadPanel();
+                } else { statusEl.className = 'text-danger fw-bold mb-1'; statusEl.innerText = '❌ Format Salah'; }
+            } catch (err) { statusEl.innerText = '❌ Error'; }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    function cleanBarcode(val) {
+        if (!val && val !== 0) return "";
+        let s = String(val).trim();
+        if (s.toLowerCase().includes('e+')) {
+            let num = Number(s);
+            if (!isNaN(num)) s = num.toLocaleString('fullwide', {useGrouping:false});
+        }
+        if (s.endsWith('.0')) s = s.slice(0, -2);
+        return s;
+    }
+
+    function handleUploadProduk(e) {
+        let file = e.target.files[0];
+        if (!file) return;
+        let statusEl = document.getElementById('statusProduk');
+        statusEl.className = 'text-primary fw-bold mb-1'; statusEl.innerText = '⏳ Loading...';
+        let reader = new FileReader();
+        reader.onload = function(evt) {
+            try {
+                let workbook = XLSX.read(new Uint8Array(evt.target.result), {type: 'array'});
+                masterProduk = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]).map(row => ({
+                    kode: getCellValue(row, ['pcode', 'kodeproduk', 'kode']),
+                    barcode: cleanBarcode(getCellValue(row, ['barcode', 'barcodes', 'ean', 'upc', 'kodebar', 'codebar'])),
+                    nama: getCellValue(row, ['namabarang', 'namaproduk', 'nama', 'produk']),
+                    uom1: getCellValue(row, ['uom1']), uom2: getCellValue(row, ['uom2']), uom3: getCellValue(row, ['uom3']),
+                    conv1: parseFloat(getCellValue(row, ['convfact1', 'conv1'])) || 1,
+                    conv2: parseFloat(getCellValue(row, ['convfact2', 'conv2'])) || 1,
+                    harga: parseFloat(getCellValue(row, ['harga', 'price', 'hargajual'])) || 0,
+                    stock: parseFloat(getCellValue(row, ['stock', 'stok', 'akhirstock', 'stockakhir'])) || 0
+                })).filter(p => p.nama !== "");
+                if (masterProduk.length > 0) {
+                    statusEl.className = 'text-success fw-bold mb-1'; statusEl.innerText = `✔️ ${masterProduk.length} Data (Baru) [Barcode OK]`;
+                    localStorage.setItem('artsoft_masterProd', JSON.stringify(masterProduk));
+                    initProductAutocomplete(); toggleMasterUploadPanel();
+                } else { statusEl.className = 'text-danger fw-bold mb-1'; statusEl.innerText = '❌ Format Salah'; }
+            } catch (err) { statusEl.innerText = '❌ Error'; }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    function initDefaultDate() {
+        const t = new Date();
+        let y = t.getFullYear();
+        let m = String(t.getMonth()+1).padStart(2,'0');
+        let d = String(t.getDate()).padStart(2,'0');
+        
+        let isoDate = `${y}-${m}-${d}`;
+        document.getElementById('orderDatePicker').value = isoDate;
+        
+        let dd = document.getElementById('dateDisplay'); 
+        if(dd) dd.innerText = `${d}-${m}-${y}`; 
+        
+        let calDay = document.getElementById('dynamicCalDay');
+        if(calDay) calDay.innerText = d;
+
+        let filterCalDay = document.getElementById('dynamicFilterCalDay');
+        if(filterCalDay) filterCalDay.innerText = d;
+    }
+
+    function getFormattedDateYY() {
+        const val = document.getElementById('orderDatePicker').value;
+        if (!val) return '';
+        const p = val.split('-');
+        return `${p[2]}-${p[1]}-${p[0].slice(-2)}`; 
+    }
+
+    function generateOrderNo() {
+        if (!isEditingMode) {
+            let salesId = document.getElementById('salesId').value.trim() || "000";
+            let last3Sales = salesId.length >= 3 ? salesId.slice(-3) : salesId.padStart(3, '0');
+            let currentCounter = parseInt(localStorage.getItem(`savedOrderCounter_${salesId}`)) || 1;
+            document.getElementById('orderNo').value = `${last3Sales}${String(currentCounter).padStart(5, '0')}`;
+        }
+    }
+
+    function initCustomerAutocomplete() {
+        $("#custSearch").autocomplete({
+            minLength: 1,
+            source: function(request, response) {
+                let term = request.term.toLowerCase();
+                response(masterCustomer.filter(c => c.nama.toLowerCase().includes(term) || c.kode.toLowerCase().includes(term))
+                    .map(c => ({ label: `[${c.kode}] ${c.nama} - ${c.alamat || '-'}`, value: c.nama, id: c.kode, alamat: c.alamat })).slice(0, 30));
+            },
+            select: function(event, ui) {
+                if (!ui.item.id) return;
+                $("#custId").val(ui.item.id);
+                $("#custDetail").text(`${ui.item.id} | ${ui.item.alamat || '-'}`);
+                setTimeout(() => { document.getElementById('inputProdSearch').focus(); document.getElementById('inputProdSearch').select(); }, 100);
+            }
+        });
+    }
+
+    function initProductAutocomplete() {
+        $("#inputProdSearch").autocomplete({
+            minLength: 1,
+            source: function(request, response) {
+                let term = request.term.toLowerCase();
+                response(masterProduk.filter(p => p.nama.toLowerCase().includes(term) || p.kode.toLowerCase().includes(term) || (p.barcode && p.barcode.toLowerCase().includes(term)))
+                    .map(p => ({ label: `[${p.kode}] ${p.nama} - Stock: ${p.stock || 0}`, value: p.nama, kode: p.kode, barcode: p.barcode, harga: p.harga, stock: p.stock || 0, uom1: p.uom1, uom2: p.uom2, uom3: p.uom3, conv1: p.conv1, conv2: p.conv2 })).slice(0, 30));
+            },
+            select: function(event, ui) { applyProductSelection(ui.item); }
+        });
+    }
+
+    function applyProductSelection(item) {
+        $("#inputProdCode").val(item.kode);
+        $("#inputProdPrice").val(item.harga);
+        $("#inputHargaSatuanMaster").val(item.harga);
+        $("#prodStockInfo").text(`Info Stock Akhir: ${item.stock} (${item.uom3 || 'Pcs'})`);
+        let uom1 = item.uom1 || 'Krt', uom2 = item.uom2 || 'Pak', uom3 = item.uom3 || 'Pcs';
+        document.getElementById('lblSatuan1').innerText = uom1;
+        document.getElementById('lblSatuan2').innerText = uom2;
+        document.getElementById('lblSatuan3').innerText = uom3;
+        $("#inputConv1").val(item.conv1 || 1); $("#inputConv2").val(item.conv2 || 1);
+        $("#inputUom1").val(uom1); $("#inputUom2").val(uom2); $("#inputUom3").val(uom3);
+        $("#inputQty1").val(0); $("#inputQty2").val(0); $("#inputQty3").val(1);
+        document.getElementById('lblSatuanBonus').innerText = uom3;
+        $("#inputBonus").val(0);
+        calculateCurrentSubtotal();
+        setTimeout(() => { document.getElementById('inputQty3').focus(); document.getElementById('inputQty3').select(); }, 50);
+    }
+
+    function triggerScanTokoGps() {
+        let custName = document.getElementById('custSearch').value.trim();
+        let custId = document.getElementById('custId').value.trim();
+        if (!custId || !custName) { artAlert("Harap pilih atau ketik Toko / Customer terlebih dahulu!"); document.getElementById('custSearch').focus(); return; }
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                position => { window._tempTokoGps = { lat: position.coords.latitude, lng: position.coords.longitude }; document.getElementById('tokoCameraInput').click(); },
+                () => artAlert("Gagal mendapatkan sinyal GPS."),
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        } else { artAlert("Geolocation tidak didukung oleh browser ini."); }
+    }
+
+    async function handleTokoCameraCaptured(inputElement) {
+        if (inputElement.files && inputElement.files[0]) {
+            let file = inputElement.files[0];
+            let custName = document.getElementById('custSearch').value.trim();
+            let custId = document.getElementById('custId').value.trim();
+            let sid = document.getElementById('salesId').value.trim();
+            loadSalesList();
+            let foundSales = registeredSales.find(s => s.code === sid);
+            let gps = window._tempTokoGps || { lat: 0, lng: 0 };
+            let messageText = `📍 *LAPORAN KUNJUNGAN TOKO*\n----------------------------------\n🏬 Toko: *${custName}* (${custId})\n👤 Sales: *${foundSales ? foundSales.name : sid}* (${sid})\n🕒 Waktu: ${new Date().toLocaleString('id-ID')}\n🌐 Koordinat: ${gps.lat.toFixed(5)}, ${gps.lng.toFixed(5)}\n🗺️ Google Maps:\nhttps://www.google.com/maps?q=${gps.lat},${gps.lng}`;
+            let link = document.createElement("a");
+            link.href = URL.createObjectURL(file); link.download = `FotoToko_${custId}_${Date.now()}.jpg`;
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                try { await navigator.share({ title: 'Kunjungan Toko & GPS', text: messageText, files: [file] }); return; } catch (e) {}
+            }
+            if (navigator.share) {
+                try { await navigator.share({ title: 'Kunjungan Toko & GPS', text: messageText + `\n(Foto toko telah diunduh)` }); } catch (e) {}
+            } else { await artPrompt("Salin teks laporan kunjungan toko & GPS:", messageText); }
+        }
+        inputElement.value = '';
+    }
+
+    function startScanner() { document.getElementById('scannerFileInput').click(); }
+
+    async function handleScannerFileSelected(inputElement) {
+        if (inputElement.files && inputElement.files[0]) {
+            let file = inputElement.files[0];
+            let searchInput = document.getElementById('inputProdSearch');
+            let originalPlaceholder = searchInput.placeholder;
+            searchInput.placeholder = "🔍 Membaca barcode dari foto...";
+            try {
+                if ('BarcodeDetector' in window) {
+                    const barcodes = await new BarcodeDetector({ formats: ['code_128', 'code_39', 'code_93', 'codabar', 'ean_13', 'ean_8', 'itf', 'upc_a', 'upc_e', 'qr_code'] }).detect(await createImageBitmap(file));
+                    if (barcodes && barcodes.length > 0) { searchInput.placeholder = originalPlaceholder; processScannedCode(barcodes[0].rawValue); inputElement.value = ''; return; }
+                }
+            } catch (err) {}
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                let img = new Image();
+                img.onload = function() {
+                    let canvas = document.createElement('canvas');
+                    let width = img.width, height = img.height;
+                    if (width > height) { if (width > 1280) { height *= 1280 / width; width = 1280; } }
+                    else { if (height > 1280) { width *= 1280 / height; height = 1280; } }
+                    canvas.width = width; canvas.height = height;
+                    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                    canvas.toBlob(blob => {
+                        let tempDiv = document.createElement('div'); tempDiv.id = 'tempReaderDiv'; tempDiv.style.display = 'none'; document.body.appendChild(tempDiv);
+                        new Html5Qrcode('tempReaderDiv').scanFile(new File([blob], file.name, { type: 'image/jpeg' }), true)
+                            .then(text => { searchInput.placeholder = originalPlaceholder; Html5Qrcode.clear(); tempDiv.remove(); processScannedCode(text); })
+                            .catch(() => { searchInput.placeholder = originalPlaceholder; Html5Qrcode.clear(); tempDiv.remove(); artAlert("Barcode tidak terbaca."); });
+                    }, 'image/jpeg', 0.95);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+        inputElement.value = '';
+    }
+
+    function processScannedCode(decodedText) {
+        let cleanText = String(decodedText).trim().toLowerCase();
+        if (!masterProduk || masterProduk.length === 0) { artAlert(`Master produk masih kosong!`); return; }
+        let found = masterProduk.find(p => {
+            let pBar = p.barcode ? String(p.barcode).trim().toLowerCase() : "";
+            let pCod = p.kode ? String(p.kode).trim().toLowerCase() : "";
+            return (pBar && (pBar === cleanText || pBar.includes(cleanText) || cleanText.includes(pBar))) || (pCod && (pCod === cleanText || pCod.includes(cleanText) || cleanText.includes(pCod)));
+        });
+        if (found) { $("#inputProdSearch").val(found.nama); applyProductSelection(found); }
+        else { artAlert(`Barcode terdeteksi: "${cleanText}"\nTidak ditemukan.`); }
+    }
+
+    function calculateCurrentSubtotal() {
+        let q1 = parseInt(document.getElementById('inputQty1').value) || 0;
+        let q2 = parseInt(document.getElementById('inputQty2').value) || 0;
+        let q3 = parseInt(document.getElementById('inputQty3').value) || 0;
+        let c1 = parseFloat(document.getElementById('inputConv1').value) || 1;
+        let c2 = parseFloat(document.getElementById('inputConv2').value) || 1;
+        let totalPcs = (q1 * (c1 > 1 ? c1 : 1)) + (q2 * (c2 > 1 ? c2 : 1)) + q3;
+        if (totalPcs < 0) totalPcs = 0;
+        let masterHarga = parseFloat(document.getElementById('inputHargaSatuanMaster').value) || 0;
+        
+        let discPInput = document.getElementById('inputDiscP').value || "0";
+        let discP = parseFloat(discPInput.replace('%', '')) || 0;
+        
+        let discRpInput = document.getElementById('inputDiscRp').value || "0";
+        let discRp = parseFloat(discRpInput.replace(/\./g, '')) || 0;
+        
+        let sub = (totalPcs * masterHarga) - ((totalPcs * masterHarga) * (discP / 100)) - discRp;
+        if (sub < 0) sub = 0;
+        document.getElementById('inputHarga').setAttribute('data-raw', masterHarga);
+        document.getElementById('inputHarga').value = masterHarga.toLocaleString('id-ID');
+        document.getElementById('inputSubtotal').value = sub.toLocaleString('id-ID');
+    }
+
+    function addCurrentProductToOrder() {
+        let code = document.getElementById('inputProdCode').value;
+        let name = document.getElementById('inputProdSearch').value;
+        let price = parseFloat(document.getElementById('inputHargaSatuanMaster').value) || 0;
+        if (!code) { artAlert('Pilih produk terlebih dahulu!'); return; }
+        
+        let rawQ1 = parseInt(document.getElementById('inputQty1').value) || 0;
+        let rawQ2 = parseInt(document.getElementById('inputQty2').value) || 0;
+        let rawQ3 = parseInt(document.getElementById('inputQty3').value) || 0;
+        let bonusQty = parseInt(document.getElementById('inputBonus').value) || 0;
+        let c1 = parseFloat(document.getElementById('inputConv1').value) || 1;
+        let c2 = parseFloat(document.getElementById('inputConv2').value) || 1;
+        
+        let totalPcs = (rawQ1 * (c1 > 1 ? c1 : 1)) + (rawQ2 * (c2 > 1 ? c2 : 1)) + rawQ3;
+        let totalDeduct = totalPcs + bonusQty;
+        
+        if (totalPcs <= 0 && bonusQty <= 0) { artAlert("Kuantitas order atau bonus minimal 1!"); return; }
+
+        let foundProd = masterProduk.find(p => p.kode === code);
+        let currentStock = foundProd ? (parseFloat(foundProd.stock) || 0) : 0;
+        
+        if (currentStock <= 0) {
+            artAlert("Yeee ... stock kosong, lapor donk!!!");
+            return;
+        }
+        if (totalDeduct > currentStock) {
+            artAlert(`Tidak cukup, stock sisa:  ${currentStock} !`);
+            return;
+        }
+
+        if (currentSessionItems.some(item => item.code === code)) { artAlert(`Barang "${name}" sudah ada di nota!`); return; }
+        
+        if (foundProd) {
+            foundProd.stock = currentStock - totalDeduct;
+            try { localStorage.setItem('artsoft_masterProd', JSON.stringify(masterProduk)); } catch(e) {}
+        }
+
+        currentSessionItems.push({
+            code, name, price, totalPcs, q1: rawQ1, q2: rawQ2, q3: rawQ3, bonus: bonusQty,
+            uom1: document.getElementById('inputUom1').value, uom2: document.getElementById('inputUom2').value, uom3: document.getElementById('inputUom3').value,
+            conv1: c1, conv2: c2, 
+            discP: document.getElementById('inputDiscP').value.replace('%','') || "0", 
+            discRp: document.getElementById('inputDiscRp').value.replace(/\./g, '') || "0",
+            subtotal: parseFloat(document.getElementById('inputSubtotal').value.replace(/\./g, '')) || 0,
+            isFromDb: false
+        });
+        clearProductSelection(); renderCurrentSessionItems();
+    }
+
+    function editCurrentSessionItem(index) {
+        let item = currentSessionItems[index];
+        
+        let foundProd = masterProduk.find(p => p.kode === item.code);
+        if (foundProd) {
+            let totalDeduct = item.totalPcs + (item.bonus || 0);
+            foundProd.stock = (parseFloat(foundProd.stock) || 0) + totalDeduct;
+            try { localStorage.setItem('artsoft_masterProd', JSON.stringify(masterProduk)); } catch(e) {}
+        }
+        
+        document.getElementById('inputProdCode').value = item.code;
+        document.getElementById('inputProdSearch').value = item.name;
+        document.getElementById('inputHargaSatuanMaster').value = item.price;
+        
+        let totalPcs = item.totalPcs;
+        document.getElementById('inputQty1').value = 0;
+        document.getElementById('inputQty2').value = 0;
+        document.getElementById('inputQty3').value = totalPcs;
+        
+        document.getElementById('lblSatuan1').innerText = item.uom1 || 'Krt';
+        document.getElementById('lblSatuan2').innerText = item.uom2 || 'Pak';
+        document.getElementById('lblSatuan3').innerText = item.uom3 || 'Pcs';
+        document.getElementById('inputConv1').value = item.conv1 || 1;
+        document.getElementById('inputConv2').value = item.conv2 || 1;
+        document.getElementById('inputUom1').value = item.uom1 || '';
+        document.getElementById('inputUom2').value = item.uom2 || '';
+        document.getElementById('inputUom3').value = item.uom3 || '';
+        document.getElementById('inputBonus').value = item.bonus || 0;
+        document.getElementById('lblSatuanBonus').innerText = item.uom3 || 'Pcs';
+        
+        document.getElementById('inputDiscP').value = item.discP + '%';
+        document.getElementById('inputDiscRp').value = parseFloat(item.discRp || 0).toLocaleString('id-ID');
+        
+        document.getElementById('inputHarga').value = parseFloat(item.price).toLocaleString('id-ID');
+        document.getElementById('inputSubtotal').value = parseFloat(item.subtotal).toLocaleString('id-ID');
+        
+        currentSessionItems.splice(index, 1); renderCurrentSessionItems();
+        document.getElementById('inputQty3').focus(); document.getElementById('inputQty3').select();
+    }
+
+    function removeCurrentSessionItem(index) { 
+        let item = currentSessionItems[index];
+        let foundProd = masterProduk.find(p => p.kode === item.code);
+        if (foundProd) {
+            let totalDeduct = item.totalPcs + (item.bonus || 0);
+            foundProd.stock = (parseFloat(foundProd.stock) || 0) + totalDeduct;
+            try { localStorage.setItem('artsoft_masterProd', JSON.stringify(masterProduk)); } catch(e) {}
+        }
+        
+        currentSessionItems.splice(index, 1); 
+        renderCurrentSessionItems(); 
+    }
+
+    function renderCurrentSessionItems() {
+        let container = document.getElementById('currentOrderItemsList');
+        container.innerHTML = '';
+        if (currentSessionItems.length === 0) { container.innerHTML = '<div class="text-muted text-center py-2 bg-white rounded border" style="font-size: 0.8rem;">Belum ada produk ditambahkan</div>'; updateBottomBar(0); return; }
+        let grandTotal = 0;
+        currentSessionItems.forEach((item, idx) => {
+            grandTotal += parseFloat(item.subtotal);
+            let div = document.createElement('div');
+            div.className = 'saved-item-card d-flex justify-content-between align-items-center';
+            let bonusHtml = item.bonus > 0 ? ` | <span class="badge bg-success">Bonus: ${item.bonus} ${item.uom3}</span>` : '';
+            div.innerHTML = `<div><div><b>${idx + 1}. [${item.code}] ${item.name}</b></div><div class="text-muted" style="font-size: 0.75rem;">Qty: <b>${item.q1}</b>(${item.uom1}) | <b>${item.q2}</b>(${item.uom2}) | <b>${item.q3}</b>(${item.uom3})${bonusHtml}</div></div><div class="text-end"><div class="text-primary fw-bold" style="font-size: 0.85rem;">Rp ${parseFloat(item.subtotal).toLocaleString('id-ID')}</div><div class="mt-1"><button type="button" class="btn btn-outline-warning btn-sm py-0 px-1 me-1" style="font-size:0.65rem;" onclick="editCurrentSessionItem(${idx})">Edit</button><button type="button" class="btn btn-outline-danger btn-sm py-0 px-1" style="font-size:0.65rem;" onclick="removeCurrentSessionItem(${idx})">Hapus</button></div></div>`;
+            container.appendChild(div);
+        });
+        updateBottomBar(grandTotal);
+    }
+
+    function openStockReportModal() { renderStockReportTable(); document.getElementById('stockReportModal').style.display = 'flex'; }
+    function closeStockReportModal() { document.getElementById('stockReportModal').style.display = 'none'; }
+
+    function renderStockReportTable(filterText = '') {
+        let tbody = document.querySelector('#stockReportTable tbody');
+        tbody.innerHTML = '';
+        if (!masterProduk || masterProduk.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Master kosong</td></tr>'; return; }
+        masterProduk.filter(p => filterText === '' || p.nama.toLowerCase().includes(filterText.toLowerCase()) || p.kode.toLowerCase().includes(filterText.toLowerCase())).forEach(p => {
+            let tr = document.createElement('tr');
+            tr.innerHTML = `<td><b class="text-primary">${p.kode}</b></td><td>${p.nama}</td><td class="text-end">${parseFloat(p.harga || 0).toLocaleString('id-ID')}</td><td class="text-end fw-bold text-success">${parseFloat(p.stock || 0).toLocaleString('id-ID')}</td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function filterStockReport() { renderStockReportTable(document.getElementById('reportSearch').value); }
+    function exportStockReportXLSX() {
+        if (!masterProduk || masterProduk.length === 0) { artAlert('Tidak ada data stok!'); return; }
+        let ws = XLSX.utils.json_to_sheet(masterProduk.map(p => ({ Kode: p.kode, Nama_Produk: p.nama, Harga: p.harga, Saldo_Stock: p.stock || 0 })));
+        let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "SaldoStock");
+        XLSX.writeFile(wb, "Saldo_Stock_Saat_Ini.xlsx");
+    }
+
+    function handleFormSubmit(e) {
+        e.preventDefault();
+        let orderNo = document.getElementById('orderNo').value, custId = document.getElementById('custId').value, custName = document.getElementById('custSearch').value, salesId = document.getElementById('salesId').value;
+        if (!custId) { artAlert('Pilih toko/customer terlebih dahulu!'); return; }
+        if (currentSessionItems.length === 0) { artAlert('Masukkan minimal 1 produk!'); return; }
+        if (isEditingMode) transactionData = transactionData.filter(item => item.orderNo !== orderNo);
+        else {
+            let counterKey = `savedOrderCounter_${salesId}`;
+            localStorage.setItem(counterKey, (parseInt(localStorage.getItem(counterKey)) || 1) + 1);
+        }
+        
+        let d = new Date(), dateYY = getFormattedDateYY(), timeStr = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+        currentSessionItems.forEach(item => {
+            transactionData.push({ orderNo, custId, salesId, dateYY, timeStr, top: "14", ketNota: "", custName, produkCode: item.code, q1: item.q1, q2: item.q2, q3: item.q3, bonus: item.bonus, uom1: item.uom1, uom2: item.uom2, uom3: item.uom3, conv1: item.conv1, conv2: item.conv2, discPersen: item.discP, discRp: item.discRp, subtotal: item.subtotal });
+        });
+        
+        currentSessionItems = []; 
+        saveTransactionsToLocal(); renderSummaryTable(); resetFormOnly();
+        artAlert(`Sales Order ${orderNo} berhasil disimpan!`);
+    }
+
+    function resetFormOnly() {
+        if (currentSessionItems && currentSessionItems.length > 0) {
+            currentSessionItems.forEach(item => {
+                if (!item.isFromDb) {
+                    let foundProd = masterProduk.find(p => p.kode === item.code);
+                    if (foundProd) {
+                        let totalDeduct = item.totalPcs + (item.bonus || 0);
+                        foundProd.stock = (parseFloat(foundProd.stock) || 0) + totalDeduct;
+                    }
+                }
+            });
+            try { localStorage.setItem('artsoft_masterProd', JSON.stringify(masterProduk)); } catch(e) {}
+        }
+        
+        isEditingMode = false;
+        document.getElementById('formTitle').innerHTML = 'INPUT ORDER <i class="fas fa-shopping-cart ms-1 text-warning"></i>';
+        document.getElementById('formHeader').style.background = 'linear-gradient(135deg, #0f172a 0%, #1e3c72 50%, #2a5298 100%)';
+        let btn = document.getElementById('btnSave'); btn.innerText = 'Simpan Nota'; btn.className = 'btn btn-primary fw-bold px-4';
+        document.getElementById('custSearch').value = ''; document.getElementById('custId').value = ''; document.getElementById('custDetail').innerText = ''; document.getElementById('prodStockInfo').innerText = '';
+        clearProductSelection(); 
+        currentSessionItems = []; renderCurrentSessionItems(); generateOrderNo(); window.scrollTo(0,0);
+    }
+
+    function renderSummaryTable() {
+        let tbody = document.querySelector('#summaryTable tbody'); tbody.innerHTML = '';
+        let grouped = {};
+        transactionData.forEach(item => {
+            let ymd = "";
+            if (item.dateYY) { 
+                let p = item.dateYY.split('-'); 
+                if (p.length === 3) {
+                    let year = p[2].length === 2 ? '20' + p[2] : p[2]; 
+                    ymd = year + '-' + p[1] + '-' + p[0]; 
+                } 
+            }
+            if (!grouped[item.orderNo]) grouped[item.orderNo] = { cust: item.custName, items: 0, total: 0, ymd };
+            grouped[item.orderNo].items++; grouped[item.orderNo].total += parseFloat(item.subtotal);
+        });
+        for (let ord in grouped) {
+            let tr = document.createElement('tr');
+            tr.innerHTML = `<td class="text-center"><input type="checkbox" class="form-check-input border-secondary export-checkbox" data-date="${grouped[ord].ymd}" value="${ord}" onchange="updateBottomBar()" style="cursor: pointer; width: 1.2em; height: 1.2em;"></td><td><b class="text-primary">${ord}</b></td><td class="text-truncate" style="max-width: 80px;">${grouped[ord].cust}</td><td class="text-center">${grouped[ord].items}</td><td class="text-end fw-bold">${grouped[ord].total.toLocaleString('id-ID')}</td><td class="text-center"><div class="d-flex justify-content-center gap-1"><button class="btn btn-warning btn-sm py-0 px-2" onclick="editOrder('${ord}')">Edit</button><button class="btn btn-danger btn-sm py-0 px-2" onclick="deleteOrder('${ord}')">Hapus</button></div></td>`;
+            tbody.appendChild(tr);
+        }
+        if (currentSessionItems.length === 0) updateBottomBar(0);
+    }
+
+    function autoCheckByDate() {
+        let selectedDate = document.getElementById('filterCheckDate').value;
+        let checkboxes = document.querySelectorAll('.export-checkbox');
+        checkboxes.forEach(cb => { cb.checked = (selectedDate && cb.getAttribute('data-date') === selectedDate); });
+        updateBottomBar();
+    }
+
+    function toggleAllExport(source) {
+        document.querySelectorAll('.export-checkbox').forEach(cb => cb.checked = source.checked);
+        updateBottomBar();
+    }
+
+    function editOrder(orderNoToEdit) {
+        let items = transactionData.filter(item => item.orderNo === orderNoToEdit);
+        if (items.length === 0) return;
+        isEditingMode = true; let firstItem = items[0];
+        document.getElementById('formTitle').innerHTML = `EDIT ORDER ✏️: <span style="font-size:0.85rem;">${orderNoToEdit}</span>`;
+        document.getElementById('formHeader').style.background = 'linear-gradient(135deg, #4c1d95 0%, #312e81 100%)';
+        let btn = document.getElementById('btnSave'); btn.innerText = 'Update Nota'; btn.className = 'btn btn-warning fw-bold px-4';
+        document.getElementById('orderNo').value = firstItem.orderNo; document.getElementById('salesId').value = firstItem.salesId;
+        document.getElementById('custSearch').value = firstItem.custName; document.getElementById('custId').value = firstItem.custId; document.getElementById('custDetail').innerText = `${firstItem.custId}`;
+        currentSessionItems = [];
+        items.forEach(item => {
+            let foundProd = masterProduk.find(p => p.kode === item.produkCode);
+            currentSessionItems.push({
+                code: item.produkCode, name: foundProd ? foundProd.nama : item.produkCode, price: foundProd ? foundProd.harga : 0,
+                totalPcs: (item.q1 * (item.conv1 > 1 ? item.conv1 : 1)) + (item.q2 * (item.conv2 > 1 ? item.conv2 : 1)) + item.q3,
+                q1: item.q1, q2: item.q2, q3: item.q3, bonus: item.bonus || 0,
+                uom1: item.uom1 || 'Krt', uom2: item.uom2 || 'Pak', uom3: item.uom3 || 'Pcs',
+                conv1: item.conv1 || 1, conv2: item.conv2 || 1, discP: item.discPersen, discRp: item.discRp || 0, subtotal: item.subtotal,
+                isFromDb: true
+            });
+        });
+        renderCurrentSessionItems(); window.scrollTo(0, document.getElementById('soForm').offsetTop);
+    }
+
+    async function clearTransactions() {
+        if (await artConfirm('Hapus semua transaksi?')) { 
+            transactionData.forEach(item => {
+                let foundProd = masterProduk.find(p => p.kode === item.produkCode);
+                if (foundProd) {
+                    let totalPcs = (item.q1 * (item.conv1 > 1 ? item.conv1 : 1)) + (item.q2 * (item.conv2 > 1 ? item.conv2 : 1)) + item.q3;
+                    let totalDeduct = totalPcs + (item.bonus || 0);
+                    foundProd.stock = (parseFloat(foundProd.stock) || 0) + totalDeduct;
+                }
+            });
+            try { localStorage.setItem('artsoft_masterProd', JSON.stringify(masterProduk)); } catch(e) {}
+
+            transactionData = []; saveTransactionsToLocal(); renderSummaryTable(); 
+        }
+    }
+
+    async function exportToTXT() {
+        if (transactionData.length === 0) { artAlert('Tidak ada data!'); return; }
+        let checkedBoxes = Array.from(document.querySelectorAll('.export-checkbox:checked')).map(cb => cb.value);
+        if (checkedBoxes.length === 0) { artAlert('Pilih minimal 1 nota!'); return; }
+        let grouped = {};
+        transactionData.filter(row => checkedBoxes.includes(row.orderNo)).forEach(row => {
+            if(!grouped[row.orderNo]) grouped[row.orderNo] = { header: row, items: [] };
+            grouped[row.orderNo].items.push(row);
+        });
+        let txtContent = "";
+        for (let ord in grouped) {
+            let h = grouped[ord].header;
+            let dYY = h.dateYY || "";
+            let pD = dYY.split('-');
+            if(pD.length === 3 && pD[2].length === 4) dYY = `${pD[0]}-${pD[1]}-${pD[2].slice(-2)}`;
+            txtContent += `RH|${h.orderNo}|${h.salesId}|${dYY}|${h.timeStr}|${h.top}|${h.custId}|0|0|${h.custName}|${h.ketNota}\n`;
+            
+            grouped[ord].items.forEach(item => {
+                let totalPcs = (item.q1 * (item.conv1 > 1 ? item.conv1 : 1)) + (item.q2 * (item.conv2 > 1 ? item.conv2 : 1)) + item.q3;
+                let c1 = item.conv1 > 1 ? item.conv1 : 1;
+                let c2 = item.conv2 > 1 ? item.conv2 : 1;
+                let u1 = (item.uom1 || '').trim().toLowerCase();
+                let u2 = (item.uom2 || '').trim().toLowerCase();
+                let u3 = (item.uom3 || '').trim().toLowerCase();
+
+                let outQ1 = 0, outQ2 = 0, outQ3 = 0;
+                let rem = totalPcs;
+
+                if (u2 === u3 && u2 !== '') {
+                    outQ1 = Math.floor(rem / c1);
+                    rem = rem % c1;
+                    outQ2 = rem;
+                    outQ3 = 0;
+                } else if (u1 === u2 && u1 !== '') {
+                    outQ1 = Math.floor(rem / c1);
+                    rem = rem % c1;
+                    outQ2 = 0;
+                    outQ3 = rem;
+                } else if (u1 === u2 && u2 === u3 && u1 !== '') {
+                    outQ1 = rem;
+                    outQ2 = 0;
+                    outQ3 = 0;
+                } else {
+                    let units = [
+                        { id: 1, conv: c1 },
+                        { id: 2, conv: c2 }
+                    ].sort((a, b) => b.conv - a.conv);
+                    
+                    units.forEach(u => {
+                        if (rem >= u.conv) {
+                            let qty = Math.floor(rem / u.conv);
+                            rem = rem % u.conv;
+                            if (u.id === 1) outQ1 = qty;
+                            if (u.id === 2) outQ2 = qty;
+                        }
+                    });
+                    outQ3 = rem;
+                }
+
+                txtContent += `RD|${item.produkCode}|${outQ1}|${outQ2}|${outQ3}\n`;
+            });
+        }
+        let salesId = document.getElementById('salesId').value.trim() || "000";
+        let exportSeqKey = `exportCounter_${salesId}`;
+        let fileName = `${salesId.length >= 3 ? salesId.slice(-3) : salesId.padStart(3, '0')}${String(parseInt(localStorage.getItem(exportSeqKey)) || 1).padStart(5, '0')}.TXT`;
+        let file = new File([txtContent], fileName, { type: 'text/plain' });
+        const finish = () => { localStorage.setItem(exportSeqKey, (parseInt(localStorage.getItem(exportSeqKey)) || 1) + 1); artAlert(`File ${fileName} diexport.`); document.querySelectorAll('.export-checkbox').forEach(cb => cb.checked = false); };
+        
+        let t = new Date();
+        let shareDate = String(t.getDate()).padStart(2, '0') + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + t.getFullYear();
+        
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            try { await navigator.share({ files: [file], title: 'Export SO', text: `Berikut Order ${shareDate}` }); finish(); } catch(e) {}
+        } else {
+            let link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([txtContent], { type: 'text/plain;charset=utf-8;' })); link.download = fileName;
+            document.body.appendChild(link); link.click(); document.body.removeChild(link); finish();
+        }
+    }
+</script>
+
+<!-- MODAL SALDO STOCK -->
+<div id="stockReportModal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;">
+    <div style="background: white; padding: 20px; border-radius: 10px; width: 95%; max-width: 500px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+        <div class="d-flex justify-content-between align-items-center mb-2 border-bottom pb-2">
+            <h6 class="fw-bold text-primary m-0">SALDO STOCK</h6>
+            <button type="button" class="btn btn-sm btn-secondary py-0 px-2" onclick="closeStockReportModal()">Tutup</button>
+        </div>
+        <div class="mb-2"><input type="text" id="reportSearch" class="form-control form-control-sm" placeholder="🔍 Cari nama/kode produk..." oninput="filterStockReport()"></div>
+        <div class="table-responsive flex-grow-1" style="max-height: 60vh; overflow-y: auto;">
+            <table class="table table-striped table-bordered align-middle" id="stockReportTable" style="font-size: 0.75rem; white-space: nowrap;">
+                <thead class="table-dark text-center sticky-top">
+                    <tr>
+                        <th style="text-align: center;">Kode</th>
+                        <th style="text-align: center;">Nama Produk</th>
+                        <th style="text-align: center;">Harga (Rp)</th>
+                        <th style="text-align: center;">Saldo Stock</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="mt-2 text-end"><button class="btn btn-sm btn-success fw-bold" onclick="exportStockReportXLSX()">Excel / Download</button></div>
+    </div>
+</div>
+
+<div id="printArea" style="display: none;"></div>
+
+<script>
+function processSelectedInvoices(action = 'print') {
+    let checkedBoxes = Array.from(document.querySelectorAll('.export-checkbox:checked')).map(cb => cb.value);
+    if (checkedBoxes.length === 0) { artAlert('Pilih minimal 1 nota untuk dicetak / dikirim PDF!'); return; }
+    
+    let currentSalesId = document.getElementById('salesId').value.trim();
+    loadSalesList();
+    let foundSales = registeredSales.find(s => s.code === currentSalesId);
+    if (!foundSales || !foundSales.canPrint) {
+        artAlert("Akses Ditolak! Anda tidak memiliki izin dari Admin untuk mencetak atau membagikan invoice PDF.");
+        return;
+    }
+
+    let compName = localStorage.getItem('savedAppName') || 'PT. SINAR ALAM TIMUR';
+    let savedLogo = localStorage.getItem('savedAppLogo');
+    let savedSig = localStorage.getItem('savedAppSignature');
+    let formattedNote = (localStorage.getItem('artsoft_invoice_note') || "• Barangkali ada retur/selisih harap dikonfirmasi max 1x24 jam.\n• Terima kasih atas kepercayaan dan kerja sama Anda.").replace(/\n/g, '<br>');
+    let html = '';
+    checkedBoxes.forEach((orderNo, idx) => {
+        let orderItems = transactionData.filter(item => item.orderNo === orderNo);
+        if (!orderItems.length) return;
+        let firstItem = orderItems[0], custDetail = masterCustomer.find(c => c.kode === firstItem.custId);
+        let salesman = registeredSales.find(s => s.code === firstItem.salesId);
+        let normalCap = 10, lastCap = 6, pages = [], remaining = [...orderItems];
+        while (remaining.length > 0) {
+            if (remaining.length <= lastCap) { pages.push({ items: remaining, isLast: true }); break; }
+            else if (remaining.length <= normalCap) { let take = remaining.length - lastCap; pages.push({ items: remaining.slice(0, take), isLast: false }); remaining = remaining.slice(take); }
+            else { pages.push({ items: remaining.slice(0, normalCap), isLast: false }); remaining = remaining.slice(normalCap); }
+        }
+        let totalPages = pages.length, grandBaseTotal = 0, grandFinalTotal = 0;
+        orderItems.forEach(item => {
+            let foundProd = masterProduk.find(x => x.kode === item.produkCode);
+            let harga = foundProd ? parseFloat(foundProd.harga) : 0;
+            grandBaseTotal += ((item.q1 * (item.conv1 > 1 ? item.conv1 : 1)) + (item.q2 * (item.conv2 > 1 ? item.conv2 : 1)) + item.q3) * harga;
+            grandFinalTotal += parseFloat(item.subtotal) || 0;
+        });
+        pages.forEach((pageObj, p) => {
+            let isLastPage = pageObj.isLast, isAbsoluteLast = (idx === checkedBoxes.length - 1) && isLastPage;
+            html += `<div class="invoice-page" style="width:100%; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 10.5px; background: #fff; color: #1e293b; padding: 6px 12px 8px 12px; box-sizing: border-box; page-break-inside: avoid; break-inside: avoid; ${isAbsoluteLast ? '' : 'page-break-after: always; break-after: page;'}">`;
+            if (totalPages > 1) html += `<div style="font-size: 9.5px; color: #64748b; text-align: right; margin-bottom: 3px;">Halaman ${p + 1} dari ${totalPages}</div>`;
+            html += `<table width="100%" style="border-collapse: collapse; margin-bottom: 10px; border-bottom: 2px solid #0f172a; padding-bottom: 6px;"><tr><td width="60%" valign="top"><table style="border-collapse: collapse;"><tr>${savedLogo ? `<td valign="top" style="padding-right: 10px;"><img src="${savedLogo}" style="max-height: 48px; max-width: 120px; object-fit: contain;" /></td>` : ''}<td valign="top"><div style="font-size: 13px; font-weight: 800; color: #0f172a; line-height: 1.2;">${compName}</div><div style="font-size: 9.5px; color: #475569; margin-top: 2px;">Jl. Temanggung Tilung Induk Ruko 19-G</div><div style="font-size: 9.5px; color: #475569;">PALANGKARAYA</div></td></tr></table></td><td width="40%" align="right" valign="top"><div style="background: #0f172a; color: #ffffff; display: inline-block; padding: 3px 14px; border-radius: 4px; font-size: 15px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">INVOICE</div><div style="font-size: 11px; font-weight: 700; color: #0f172a; margin-top: 4px;">No: <span style="color: #2563eb;">${orderNo}</span></div><div style="font-size: 9.5px; color: #64748b; margin-top: 1px;">Tanggal: ${firstItem.dateYY || ''}</div></td></tr></table>`;
+            html += `<table width="100%" style="border-collapse: collapse; margin-bottom: 10px; font-size: 10.5px;"><tr><td width="55%" valign="top" style="padding: 6px 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;"><div style="font-size: 8.5px; text-transform: uppercase; font-weight: 700; color: #64748b; margin-bottom: 1px;">Kepada Yth. / Billed To:</div><div style="font-size: 11.5px; font-weight: 800; color: #0f172a; margin-bottom: 1px;">${firstItem.custName}</div><div style="font-size: 9.5px; color: #334155;">${custDetail ? (custDetail.alamat || '') : 'Palangkaraya'}</div></td><td width="3%"></td><td width="42%" valign="top" style="padding: 6px 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;"><table width="100%" style="border-collapse: collapse; font-size: 9.5px;"><tr><td width="40%" style="color: #64748b; font-weight: 600; padding-bottom: 2px;">Salesman</td><td width="60%" style="color: #0f172a; font-weight: 700;">: ${salesman ? '[' + firstItem.salesId + '] ' + salesman.name : firstItem.salesId}</td></tr><tr><td style="color: #64748b; font-weight: 600; padding-bottom: 2px;">Syarat Bayar</td><td style="color: #0f172a; font-weight: 700;">: Cash / COD</td></tr><tr><td style="color: #64748b; font-weight: 600;">Status</td><td style="color: #16a34a; font-weight: 700;">: ORDER PROSES</td></tr></table></td></tr></table>`;
+            html += `<table width="100%" style="border-collapse: collapse; font-size: 10px; border: 1px solid #cbd5e1; margin-bottom: 8px;"><thead><tr style="background: #0f172a; color: #ffffff; text-transform: uppercase; font-size: 9px; page-break-inside: avoid; break-inside: avoid;"><th style="padding: 5px 6px; border: 1px solid #334155; text-align: center; width: 11%;">Kode</th><th style="padding: 5px 6px; border: 1px solid #334155; text-align: center; width: 31%;">Nama Barang</th><th style="padding: 5px 6px; border: 1px solid #334155; text-align: center; width: 14%;">Qty</th><th style="padding: 5px 6px; border: 1px solid #334155; text-align: center; width: 8%;">Bonus</th><th style="padding: 5px 6px; border: 1px solid #334155; text-align: center; width: 12%;">Harga</th><th style="padding: 5px 6px; border: 1px solid #334155; text-align: center; width: 9%;">Disc</th><th style="padding: 5px 6px; border: 1px solid #334155; text-align: center; width: 15%;">Subtotal</th></tr></thead><tbody>`;
+            let maxItems = isLastPage ? lastCap : normalCap;
+            for (let i = 0; i < maxItems; i++) {
+                if (i < pageObj.items.length) {
+                    let item = pageObj.items[i], foundProd = masterProduk.find(x => x.kode === item.produkCode);
+                    let qtyStrs = []; if(item.q1 > 0) qtyStrs.push(item.q1 + ' ' + (item.uom1 || '')); if(item.q2 > 0) qtyStrs.push(item.q2 + ' ' + (item.uom2 || '')); if(item.q3 > 0) qtyStrs.push(item.q3 + ' ' + (item.uom3 || ''));
+                    let bonusStr = (item.bonus && item.bonus > 0) ? `${item.bonus} ${item.uom3 || 'Pcs'}` : '-';
+                    html += `<tr style="background: ${i % 2 === 0 ? '#ffffff' : '#f8fafc'}; color: #1e293b; page-break-inside: avoid; break-inside: avoid;"><td style="padding: 4px 6px; border: 1px solid #e2e8f0; text-align: center; font-weight: 600;">${item.produkCode}</td><td style="padding: 4px 6px; border: 1px solid #e2e8f0; text-align: left; text-transform: uppercase; font-weight: 600;">${foundProd ? foundProd.nama : item.produkCode}</td><td style="padding: 4px 6px; border: 1px solid #e2e8f0; text-align: right; font-weight: 700; color: #0284c7;">${qtyStrs.join(' ')}</td><td style="padding: 4px 6px; border: 1px solid #e2e8f0; text-align: center; font-weight: 700; color: #16a34a;">${bonusStr}</td><td style="padding: 4px 6px; border: 1px solid #e2e8f0; text-align: right;">${(foundProd ? parseFloat(foundProd.harga) : 0).toLocaleString('id-ID')}</td><td style="padding: 4px 6px; border: 1px solid #e2e8f0; text-align: center; color: #dc2626; font-weight: 600;">${parseFloat(item.discPersen) > 0 ? item.discPersen + '%' : '-'}</td><td style="padding: 4px 6px; border: 1px solid #e2e8f0; text-align: right; font-weight: 700;">${parseFloat(item.subtotal).toLocaleString('id-ID')}</td></tr>`;
+                } else {
+                    html += `<tr style="background: ${i % 2 === 0 ? '#ffffff' : '#f8fafc'}; color: transparent; page-break-inside: avoid; break-inside: avoid;"><td style="padding: 4px 6px; border: 1px solid #f1f5f9;">-</td><td style="padding: 4px 6px; border: 1px solid #f1f5f9;"></td><td style="padding: 4px 6px; border: 1px solid #f1f5f9;"></td><td style="padding: 4px 6px; border: 1px solid #f1f5f9;"></td><td style="padding: 4px 6px; border: 1px solid #f1f5f9;"></td><td style="padding: 4px 6px; border: 1px solid #f1f5f9;"></td><td style="padding: 4px 6px; border: 1px solid #f1f5f9;"></td></tr>`;
+                }
+            }
+            html += `</tbody></table>`;
+            if (isLastPage) {
+                let totalDisc = grandBaseTotal - grandFinalTotal; if (totalDisc < 0) totalDisc = 0;
+                
+                html += `<table width="100%" style="border-collapse: collapse; font-size: 10px; margin-top: 4px; page-break-inside: avoid; break-inside: avoid;"><tr><td width="55%" valign="top"><div style="font-size: 9px; color: #64748b; margin-bottom: 6px; font-style: italic;"><b>Note :</b><br>${formattedNote}</div><table width="100%" style="margin-top: 10px; text-align: center;"><tr><td width="50%" valign="bottom"><div style="font-size: 10px; color: #000000; font-weight: bold; margin-bottom: 35px;">Tanda Tangan / Cap Toko</div><div style="font-size: 10.5px; font-weight: 900; color: #000000; text-decoration: underline;">( ${firstItem.custName} )</div></td><td width="50%" valign="bottom"><div style="position: relative;">${savedSig ? `<div style="position: absolute; top: 0px; left: 0; right: 0; display: flex; justify-content: center; align-items: center; z-index: 1; pointer-events: none;"><img src="${savedSig}" style="max-height: 60px; max-width: 120px; object-fit: contain; opacity: 0.55;" /></div>` : ``}<div style="font-size: 10px; color: #000000; font-weight: bold; margin-bottom: 35px; position: relative; z-index: 10;">Hormat Kami,</div><div style="font-size: 10.5px; font-weight: 900; color: #000000; text-decoration: underline; position: relative; z-index: 10;">( ${salesman ? salesman.name : 'Salesman'} )</div></div></td></tr></table></td><td width="5%"></td><td width="40%" valign="top"><table width="100%" style="border-collapse: collapse; font-size: 10.5px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; overflow: hidden;"><tr><td style="padding: 5px 8px; color: #475569; font-weight: 600;">Total Item</td><td align="right" style="padding: 5px 8px; font-weight: 700;">${orderItems.length} SKU</td></tr><tr><td style="padding: 5px 8px; color: #475569; font-weight: 600;">Subtotal Gross</td><td align="right" style="padding: 5px 8px;">Rp ${grandBaseTotal.toLocaleString('id-ID')}</td></tr><tr><td style="padding: 5px 8px; color: #dc2626; font-weight: 600;">Total Diskon</td><td align="right" style="padding: 5px 8px; color: #dc2626;">- Rp ${totalDisc.toLocaleString('id-ID')}</td></tr><tr style="background: #0f172a; color: #ffffff;"><td style="padding: 6px 8px; font-weight: 800; font-size: 11.5px;">TOTAL BAYAR</td><td align="right" style="padding: 6px 8px; font-weight: 800; font-size: 12.5px; color: #38bdf8;">Rp ${grandFinalTotal.toLocaleString('id-ID')}</td></tr></table></td></tr></table>`;
+            }
+            html += `</div>`;
+        });
+    });
+
+    let mainApp = document.getElementById('mainApp'), loginScreen = document.getElementById('loginScreen'), printContainer = document.getElementById('printArea');
+    let mainDisplay = mainApp.style.cssText, loginDisplay = loginScreen.style.cssText, originalBodyBg = document.body.style.backgroundColor;
+    mainApp.style.cssText = "display: none !important;"; loginScreen.style.cssText = "display: none !important;";
+    document.body.style.backgroundColor = '#ffffff'; window.scrollTo(0,0);
+    printContainer.innerHTML = html; printContainer.style.cssText = "display: block !important; background: white; color: black; width: 100%; max-width: 16.5cm; margin: 0; min-height: 100vh; position: relative; z-index: 99999;";
+    let restoreApp = () => { mainApp.style.cssText = mainDisplay; loginScreen.style.cssText = loginDisplay; document.body.style.backgroundColor = originalBodyBg; printContainer.style.cssText = "display: none !important;"; printContainer.innerHTML = ''; };
+    if (action === 'print') {
+        setTimeout(() => { window.print(); restoreApp(); }, 500);
+    } else if (action === 'share') {
+        let fileName = 'Invoice_' + (checkedBoxes.length > 1 ? 'Multiple' : checkedBoxes[0]) + '.pdf';
+        setTimeout(() => {
+            html2pdf().set({ 
+                margin: [3, 5, 3, 5], 
+                filename: fileName, 
+                image: { type: 'jpeg', quality: 0.98 }, 
+                html2canvas: { scale: 2, useCORS: true, scrollY: 0 }, 
+                jsPDF: { unit: 'mm', format: [165, 215], orientation: 'portrait' },
+                pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', 'td', '.invoice-page'] }
+            }).from(printContainer).outputPdf('blob').then(pdfBlob => {
+                restoreApp();
+                let file = new File([pdfBlob], fileName, { type: 'application/pdf' });
+                let telegramUrl = `https://t.me/share/url?url=&text=` + encodeURIComponent("Berikut lampiran Invoice PDF order sales");
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    navigator.share({ files: [file], title: 'Invoice', text: 'Berikut lampiran Invoice.' }).then(() => window.open(telegramUrl, '_blank')).catch(() => window.open(telegramUrl, '_blank'));
+                } else {
+                    let link = document.createElement('a'); link.href = URL.createObjectURL(pdfBlob); link.download = fileName;
+                    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+                    window.open(telegramUrl, '_blank');
+                }
+            }).catch(() => { restoreApp(); artAlert('Gagal membuat PDF.'); });
+        }, 1000);
+    }
+}
+</script>
+</body>
+</html>
