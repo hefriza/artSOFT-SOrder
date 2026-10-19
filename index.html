@@ -502,7 +502,68 @@
     let currentSessionItems = []; 
     let isEditingMode = false;
     const myTabId = Math.random().toString(36).substring(2, 10);
+    const firebaseConfig = {
+      apiKey: "AIzaSyD81vs5I523lxfqP82WwJyfXk2qLGS66rI",
+      authDomain: "artsoft-order.firebaseapp.com",
+      projectId: "artsoft-order",
+      storageBucket: "artsoft-order.firebasestorage.app",
+      messagingSenderId: "489049881394",
+      appId: "1:489049881394:web:8b0a1ea0e9e7587a5f752b",
+      measurementId: "G-DLFFEQD5QB"
+      databaseURL: "https://artsoft-order-default-rtdb.asia-southeast1.firebasedatabase.app"
+    };
     
+    // Cek agar tidak terjadi inisialisasi ganda
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.database();
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // ==========================================
+    // 2. FUNGSI POTONG STOK ONLINE (AMAN DARI BENTROK)
+    // ==========================================
+    function updateStockOnline(kodeProduk, jumlahPerubahan) {
+        let stokRef = db.ref('stok_produk/' + kodeProduk);
+        stokRef.transaction(function(stokSaatIni) {
+            if (stokSaatIni === null) {
+                let found = masterProduk.find(p => p.kode === kodeProduk);
+                stokSaatIni = found ? (parseFloat(found.stock) || 0) : 0;
+            }
+            let stokBaru = stokSaatIni + jumlahPerubahan;
+            return (stokBaru < 0) ? 0 : stokBaru;
+        }, function(error, committed, snapshot) {
+            if (committed) {
+                let updatedStock = snapshot.val();
+                let found = masterProduk.find(p => p.kode === kodeProduk);
+                if (found) {
+                    found.stock = updatedStock;
+                    try { localStorage.setItem('artsoft_masterProd', JSON.stringify(masterProduk)); } catch(e) {}
+                }
+            }
+        });
+    }
+
+    // ==========================================
+    // 3. PENDENGAR PERUBAHAN STOK REAL-TIME (LISTENER)
+    // ==========================================
+    db.ref('stok_produk').on('value', (snapshot) => {
+        let dataStokOnline = snapshot.val();
+        if (dataStokOnline && masterProduk.length > 0) {
+            masterProduk.forEach(p => {
+                if (dataStokOnline[p.kode] !== undefined) {
+                    p.stock = dataStokOnline[p.kode];
+                }
+            });
+            localStorage.setItem('artsoft_masterProd', JSON.stringify(masterProduk));
+            
+            let modalStock = document.getElementById('stockReportModal');
+            if (modalStock && modalStock.style.display === 'flex' && typeof filterStockReport === 'function') {
+                filterStockReport(); 
+            }
+        }
+    });
     // FORMAT RUPIAH PADA INPUT DISC RUPIAH
     function formatDiscRpInput(elem) {
         let val = elem.value.replace(/[^0-9]/g, '');
@@ -1681,10 +1742,9 @@
 
         if (currentSessionItems.some(item => item.code === code)) { artAlert(`Barang "${name}" sudah ada di nota!`); return; }
         
-        if (foundProd) {
-            foundProd.stock = currentStock - totalDeduct;
-            try { localStorage.setItem('artsoft_masterProd', JSON.stringify(masterProduk)); } catch(e) {}
-        }
+      if (foundProd) {
+    updateStockOnline(code, -totalDeduct);
+}
 
         currentSessionItems.push({
             code, name, price, totalPcs, q1: rawQ1, q2: rawQ2, q3: rawQ3, bonus: bonusQty,
@@ -1702,12 +1762,11 @@
         let item = currentSessionItems[index];
         
         let foundProd = masterProduk.find(p => p.kode === item.code);
-        if (foundProd) {
-            let totalDeduct = item.totalPcs + (item.bonus || 0);
-            foundProd.stock = (parseFloat(foundProd.stock) || 0) + totalDeduct;
-            try { localStorage.setItem('artsoft_masterProd', JSON.stringify(masterProduk)); } catch(e) {}
-        }
-        
+    if (foundProd) {
+    let totalDeduct = item.totalPcs + (item.bonus || 0);
+    foundProd.stock = (parseFloat(foundProd.stock) || 0) + totalDeduct;
+    try { localStorage.setItem('artsoft_masterProd', JSON.stringify(masterProduk)); } catch(e) {}
+}
         document.getElementById('inputProdCode').value = item.code;
         document.getElementById('inputProdSearch').value = item.name;
         document.getElementById('inputHargaSatuanMaster').value = item.price;
